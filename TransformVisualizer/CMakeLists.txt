@@ -1,6 +1,6 @@
 #-----------------------------------------------------------------------------
-set(MODULE_NAME DeformationFieldVisualizer)
-set(MODULE_TITLE "Deformation Field Visualizer")
+set(MODULE_NAME TransformVisualizer)
+set(MODULE_TITLE "Transform Visualizer")
 
 string(TOUPPER ${MODULE_NAME} MODULE_NAME_UPPER)
 
@@ -14,7 +14,6 @@ set(MODULE_EXPORT_DIRECTIVE "Q_SLICER_QTMODULES_${MODULE_NAME_UPPER}_EXPORT")
 set(MODULE_INCLUDE_DIRECTORIES
   ${CMAKE_CURRENT_SOURCE_DIR}/Logic
   ${CMAKE_CURRENT_BINARY_DIR}/Logic
-  ${SlicerRtCommon_INCLUDE_DIRS}
   )
 
 set(MODULE_SRCS
