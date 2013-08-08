@@ -13,7 +13,7 @@ set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation
 set(EXTENSION_CATEGORY "Registration")
 set(EXTENSION_CONTRIBUTORS "Franklin King (PerkLab, Queen's University), Csaba Pinter (PerkLab, Queen's University), Andras Lasso (PerkLab, Queen's University)")
 set(EXTENSION_DESCRIPTION " Extension version: ${TRANSFORMVISUALIZER_VERSION}.")
-set(EXTENSION_ICONURL "";)
+set(EXTENSION_ICONURL "http://www.slicer.org/slicerWiki/images/5/55/TransformVisualizerLogo.png";)
 set(EXTENSION_SCREENSHOTURLS "http://www.slicer.org/slicerWiki/images/f/f7/SlicerRT_DefFieldVisGlyphUI.png http://www.slicer.org/slicerWiki/images/a/aa/SlicerRT_DefFieldVisModels.png";)
 
 #-----------------------------------------------------------------------------
