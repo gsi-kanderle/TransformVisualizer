@@ -19,8 +19,8 @@
 
 ==============================================================================*/
 
-#ifndef __vtkSlicerDeformationFieldVisualizerLogic_h
-#define __vtkSlicerDeformationFieldVisualizerLogic_h
+#ifndef __vtkSlicerTransformVisualizerLogic_h
+#define __vtkSlicerTransformVisualizerLogic_h
 
 // Slicer includes
 #include "vtkSlicerModuleLogic.h"
@@ -36,18 +36,18 @@
 #include <vtkMatrix4x4.h>
 #include <vtkImageData.h>
 
-#include "vtkSlicerDeformationFieldVisualizerModuleLogicExport.h"
+#include "vtkSlicerTransformVisualizerModuleLogicExport.h"
 
-class vtkMRMLDeformationFieldVisualizerNode;
+class vtkMRMLTransformVisualizerNode;
 class vtkMRMLVectorVolumeNode;
 
-/// \ingroup Slicer_QtModules_DeformationFieldVisualizer
-class VTK_SLICER_DEFORMATIONFIELDVISUALIZER_MODULE_LOGIC_EXPORT vtkSlicerDeformationFieldVisualizerLogic : 
+/// \ingroup Slicer_QtModules_TransformVisualizer
+class VTK_SLICER_TRANSFORMVISUALIZER_MODULE_LOGIC_EXPORT vtkSlicerTransformVisualizerLogic : 
   public vtkSlicerModuleLogic
 {
 public:
-  static vtkSlicerDeformationFieldVisualizerLogic *New();
-  vtkTypeMacro(vtkSlicerDeformationFieldVisualizerLogic, vtkSlicerModuleLogic);
+  static vtkSlicerTransformVisualizerLogic *New();
+  vtkTypeMacro(vtkSlicerTransformVisualizerLogic, vtkSlicerModuleLogic);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   enum visualizationModes
@@ -88,12 +88,12 @@ public:
   double* GetFieldRange();
 
 public:
-  void SetAndObserveDeformationFieldVisualizerNode(vtkMRMLDeformationFieldVisualizerNode *node);
-  vtkGetObjectMacro(DeformationFieldVisualizerNode, vtkMRMLDeformationFieldVisualizerNode);
+  void SetAndObserveTransformVisualizerNode(vtkMRMLTransformVisualizerNode *node);
+  vtkGetObjectMacro(TransformVisualizerNode, vtkMRMLTransformVisualizerNode);
 
 protected:
-  vtkSlicerDeformationFieldVisualizerLogic();
-  ~vtkSlicerDeformationFieldVisualizerLogic();
+  vtkSlicerTransformVisualizerLogic();
+  ~vtkSlicerTransformVisualizerLogic();
 
   virtual void RegisterNodes();
 
@@ -109,12 +109,12 @@ protected:
   vtkImageData* deformationField;
   
 private:
-  vtkSlicerDeformationFieldVisualizerLogic(const vtkSlicerDeformationFieldVisualizerLogic&);// Not implemented
-  void operator=(const vtkSlicerDeformationFieldVisualizerLogic&);// Not implemented
+  vtkSlicerTransformVisualizerLogic(const vtkSlicerTransformVisualizerLogic&);// Not implemented
+  void operator=(const vtkSlicerTransformVisualizerLogic&);// Not implemented
   
 protected:
   /// Parameter set MRML node
-  vtkMRMLDeformationFieldVisualizerNode* DeformationFieldVisualizerNode;
+  vtkMRMLTransformVisualizerNode* TransformVisualizerNode;
 };
 
 #endif

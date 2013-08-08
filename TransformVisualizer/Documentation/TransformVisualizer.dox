@@ -1,5 +1,5 @@
 /**
-\defgroup Slicer_QtModules_DeformationFieldVisualizer DeformationFieldVisualizer
+\defgroup Slicer_QtModules_TransformVisualizer TransformVisualizer
 \ingroup Slicer_QtModules
 This module visualizes deformation fields using various visualization options.
 

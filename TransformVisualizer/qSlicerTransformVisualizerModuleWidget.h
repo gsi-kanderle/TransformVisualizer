@@ -19,19 +19,19 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerDeformationFieldVisualizerModuleWidget_h
-#define __qSlicerDeformationFieldVisualizerModuleWidget_h
+#ifndef __qSlicerTransformVisualizerModuleWidget_h
+#define __qSlicerTransformVisualizerModuleWidget_h
 
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
 
-#include "qSlicerDeformationFieldVisualizerModuleExport.h"
+#include "qSlicerTransformVisualizerModuleExport.h"
 
-class qSlicerDeformationFieldVisualizerModuleWidgetPrivate;
+class qSlicerTransformVisualizerModuleWidgetPrivate;
 class vtkMRMLNode;
 
-/// \ingroup Slicer_QtModules_DeformationFieldVisualizer
-class Q_SLICER_QTMODULES_DEFORMATIONFIELDVISUALIZER_EXPORT qSlicerDeformationFieldVisualizerModuleWidget :
+/// \ingroup Slicer_QtModules_TransformVisualizer
+class Q_SLICER_QTMODULES_TRANSFORMVISUALIZER_EXPORT qSlicerTransformVisualizerModuleWidget :
   public qSlicerAbstractModuleWidget
 {
   Q_OBJECT
@@ -39,15 +39,15 @@ class Q_SLICER_QTMODULES_DEFORMATIONFIELDVISUALIZER_EXPORT qSlicerDeformationFie
   
 public:
   typedef qSlicerAbstractModuleWidget Superclass;
-  qSlicerDeformationFieldVisualizerModuleWidget(QWidget *parent=0);
-  virtual ~qSlicerDeformationFieldVisualizerModuleWidget();
+  qSlicerTransformVisualizerModuleWidget(QWidget *parent=0);
+  virtual ~qSlicerTransformVisualizerModuleWidget();
   
   virtual void enter();
 
 public slots:
   virtual void setMRMLScene(vtkMRMLScene*);
   void onSceneImportedEvent();
-  void setDeformationFieldVisualizerParametersNode(vtkMRMLNode *node);
+  void setTransformVisualizerParametersNode(vtkMRMLNode *node);
   void updateWidgetFromMRML();
 
   void visualize();
@@ -109,14 +109,14 @@ protected slots:
   void setGridSliceSpacingMM(double);
   
 protected:
-  QScopedPointer<qSlicerDeformationFieldVisualizerModuleWidgetPrivate> d_ptr;
+  QScopedPointer<qSlicerTransformVisualizerModuleWidgetPrivate> d_ptr;
   
   virtual void setup();
   void onEnter();
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerDeformationFieldVisualizerModuleWidget);
-  Q_DISABLE_COPY(qSlicerDeformationFieldVisualizerModuleWidget);
+  Q_DECLARE_PRIVATE(qSlicerTransformVisualizerModuleWidget);
+  Q_DISABLE_COPY(qSlicerTransformVisualizerModuleWidget);
 };
 
 #endif

@@ -8,7 +8,7 @@ SlicerMacroConfigureGenericCxxModuleTests(${MODULE_NAME} KIT_TEST_SRCS KIT_TEST_
 set(CMAKE_TESTDRIVER_BEFORE_TESTMAIN "DEBUG_LEAKS_ENABLE_EXIT_ERROR();" )
 create_test_sourcelist(Tests ${KIT}CxxTests.cxx
   ${KIT_TEST_NAMES_CXX}
-  vtkSlicerDeformationFieldVisualizerTest1.cxx
+  vtkSlicerTransformVisualizerTest1.cxx
   EXTRA_INCLUDE vtkMRMLDebugLeaksMacro.h
   )
 
@@ -48,10 +48,10 @@ endmacro()
 
 #-----------------------------------------------------------------------------
 TEST_WITH_DATA(
-  vtkSlicerDeformationFieldVisualizerModuleLogicTest_LinearTransform
-  vtkSlicerDeformationFieldVisualizerTest1
+  vtkSlicerTransformVisualizerModuleLogicTest_LinearTransform
+  vtkSlicerTransformVisualizerTest1
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Data
-  ${TEMP}/TestScene_DeformationFieldVisualizer_LinearTransform.mrml
+  ${TEMP}/TestScene_TransformVisualizer_LinearTransform.mrml
   LinearTransform.tfm
   LinearGlyphBaseline.vtk
   LinearGridBaseline.vtk
@@ -62,14 +62,14 @@ TEST_WITH_DATA(
   1.0
   1.0
 )
-set_tests_properties(vtkSlicerDeformationFieldVisualizerModuleLogicTest_LinearTransform PROPERTIES FAIL_REGULAR_EXPRESSION "Error;ERROR;Warning;WARNING" )
+set_tests_properties(vtkSlicerTransformVisualizerModuleLogicTest_LinearTransform PROPERTIES FAIL_REGULAR_EXPRESSION "Error;ERROR;Warning;WARNING" )
 
 #-----------------------------------------------------------------------------
 TEST_WITH_DATA(
-  vtkSlicerDeformationFieldVisualizerModuleLogicTest_BSplineTransform
-  vtkSlicerDeformationFieldVisualizerTest1
+  vtkSlicerTransformVisualizerModuleLogicTest_BSplineTransform
+  vtkSlicerTransformVisualizerTest1
   ${CMAKE_CURRENT_SOURCE_DIR}/../../Data
-  ${TEMP}/TestScene_DeformationFieldVisualizer_BSplineTransform.mrml
+  ${TEMP}/TestScene_TransformVisualizer_BSplineTransform.mrml
   BSplineTransform.tfm
   BSplineGlyphBaseline.vtk
   BSplineGridBaseline.vtk
@@ -80,4 +80,4 @@ TEST_WITH_DATA(
   1.0
   1.0
 )
-set_tests_properties(vtkSlicerDeformationFieldVisualizerModuleLogicTest_BSplineTransform PROPERTIES FAIL_REGULAR_EXPRESSION "Error;ERROR;Warning;WARNING" )
+set_tests_properties(vtkSlicerTransformVisualizerModuleLogicTest_BSplineTransform PROPERTIES FAIL_REGULAR_EXPRESSION "Error;ERROR;Warning;WARNING" )

@@ -19,12 +19,9 @@
 
 ==============================================================================*/
 
-//DeformationFieldVisualizer logic
-#include "vtkSlicerDeformationFieldVisualizerLogic.h"
-#include "vtkMRMLDeformationFieldVisualizerNode.h"
-
-// SlicerRt includes
-#include "SlicerRtCommon.h"
+//TransformVisualizer logic
+#include "vtkSlicerTransformVisualizerLogic.h"
+#include "vtkMRMLTransformVisualizerNode.h"
 
 // MRML includes
 #include <vtkMRMLModelNode.h>
@@ -45,6 +42,7 @@
 #include <vtkPointData.h>
 #include <vtkMassProperties.h>
 #include <vtkTriangleFilter.h>
+
 #ifdef WIN32
   #include <vtkWin32OutputWindow.h>
 #endif
@@ -57,8 +55,21 @@
 // VTKSYS includes
 #include <vtksys/SystemTools.hxx>
 
+// Define case insensitive string compare for all supported platforms
+#if defined( _WIN32 ) && !defined(__CYGWIN__)
+#  if defined(__BORLANDC__)
+#    define STRCASECMP stricmp
+#  else
+#    define STRCASECMP _stricmp
+#  endif
+#else
+#  define STRCASECMP strcasecmp
+#endif
+
+#define EPSILON 0.0001
+
 //-----------------------------------------------------------------------------
-int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
+int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
 {
   int argIndex = 1;
 
@@ -309,7 +320,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
   mrmlScene->Commit();
   
   // Set up parameter node
-  vtkSmartPointer<vtkMRMLDeformationFieldVisualizerNode> paramNode = vtkSmartPointer<vtkMRMLDeformationFieldVisualizerNode>::New();
+  vtkSmartPointer<vtkMRMLTransformVisualizerNode> paramNode = vtkSmartPointer<vtkMRMLTransformVisualizerNode>::New();
   
   std::string transformFileFullPath = std::string(dataDirectoryPath) + std::string("/") + std::string(transformFileName);
   if (!vtksys::SystemTools::FileExists(transformFileFullPath.c_str()))
@@ -394,15 +405,15 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
   mrmlScene->AddNode(paramNode);
 
   // Initialize logic node
-  vtkSmartPointer<vtkSlicerDeformationFieldVisualizerLogic> deformationFieldVisualizerLogic = vtkSmartPointer<vtkSlicerDeformationFieldVisualizerLogic>::New();
-  deformationFieldVisualizerLogic->SetMRMLScene(mrmlScene);
-  deformationFieldVisualizerLogic->SetAndObserveDeformationFieldVisualizerNode(paramNode);
+  vtkSmartPointer<vtkSlicerTransformVisualizerLogic> TransformVisualizerLogic = vtkSmartPointer<vtkSlicerTransformVisualizerLogic>::New();
+  TransformVisualizerLogic->SetMRMLScene(mrmlScene);
+  TransformVisualizerLogic->SetAndObserveTransformVisualizerNode(paramNode);
   
   // TODO: Add check for successful transform field conversion
-  deformationFieldVisualizerLogic->GenerateDeformationField();
+  TransformVisualizerLogic->GenerateDeformationField();
   
-  //Emulate parameter adjustments that are done in qSlicerDeformationFieldVisualizerModuleWidget whenever an input volume is selected
-  double* range = deformationFieldVisualizerLogic->GetFieldRange();
+  //Emulate parameter adjustments that are done in qSlicerTransformVisualizerModuleWidget whenever an input volume is selected
+  double* range = TransformVisualizerLogic->GetFieldRange();
   range[0] = floor(range[0]*10000)/10000; //truncate to 4 decimal digits due to decimal precision setting in the UI
   range[1] = ceil(range[1]*10000)/10000;
   paramNode->SetGlyphThresholdMin(range[0]);
@@ -428,7 +439,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
   // TODO: Expand tests
   //----------------------------------------------------------------------------
   // Test Glyph option
-  deformationFieldVisualizerLogic->CreateVisualization(deformationFieldVisualizerLogic->VIS_MODE_GLYPH_3D);
+  TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GLYPH_3D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
   if (modelNode == NULL)
@@ -481,7 +492,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
  
   //----------------------------------------------------------------------------
   // Test Grid option
-  deformationFieldVisualizerLogic->CreateVisualization(deformationFieldVisualizerLogic->VIS_MODE_GRID_3D);
+  TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GRID_3D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
   if (modelNode == NULL)
@@ -515,7 +526,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
 
   //----------------------------------------------------------------------------
   // Test Block mode
-  deformationFieldVisualizerLogic->CreateVisualization(deformationFieldVisualizerLogic->VIS_MODE_BLOCK_3D);
+  TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_BLOCK_3D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
   if (modelNode == NULL)
@@ -568,7 +579,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
   
   //----------------------------------------------------------------------------
   // Test Contour mode
-  deformationFieldVisualizerLogic->CreateVisualization(deformationFieldVisualizerLogic->VIS_MODE_CONTOUR_3D);
+  TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_CONTOUR_3D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
   if (modelNode == NULL)
@@ -623,7 +634,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
   
   paramNode->SetGlyphSliceNodeID(axialSliceNode->GetID());
   
-  deformationFieldVisualizerLogic->CreateVisualization(deformationFieldVisualizerLogic->VIS_MODE_GLYPH_2D);
+  TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GLYPH_2D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
   if (modelNode == NULL)
@@ -679,7 +690,7 @@ int vtkSlicerDeformationFieldVisualizerTest1(int argc, char *argv[])
   
   paramNode->SetGridSliceNodeID(sagittalSliceNode->GetID());
   
-  deformationFieldVisualizerLogic->CreateVisualization(deformationFieldVisualizerLogic->VIS_MODE_GRID_2D);
+  TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GRID_2D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
   if (modelNode == NULL)

@@ -19,19 +19,19 @@
 
 ==============================================================================*/
 
-#ifndef __qSlicerDeformationFieldVisualizerModule_h
-#define __qSlicerDeformationFieldVisualizerModule_h
+#ifndef __qSlicerTransformVisualizerModule_h
+#define __qSlicerTransformVisualizerModule_h
 
 // SlicerQt includes
 #include "qSlicerLoadableModule.h"
 
-#include "qSlicerDeformationFieldVisualizerModuleExport.h"
+#include "qSlicerTransformVisualizerModuleExport.h"
 
-class qSlicerDeformationFieldVisualizerModulePrivate;
+class qSlicerTransformVisualizerModulePrivate;
 
-/// \ingroup Slicer_QtModules_DeformationFieldVisualizer
-class Q_SLICER_QTMODULES_DEFORMATIONFIELDVISUALIZER_EXPORT
-qSlicerDeformationFieldVisualizerModule
+/// \ingroup Slicer_QtModules_TransformVisualizer
+class Q_SLICER_QTMODULES_TRANSFORMVISUALIZER_EXPORT
+qSlicerTransformVisualizerModule
   : public qSlicerLoadableModule
 {
   Q_OBJECT
@@ -40,8 +40,8 @@ qSlicerDeformationFieldVisualizerModule
 public:
 
   typedef qSlicerLoadableModule Superclass;
-  explicit qSlicerDeformationFieldVisualizerModule(QObject *parent=0);
-  virtual ~qSlicerDeformationFieldVisualizerModule();
+  explicit qSlicerTransformVisualizerModule(QObject *parent=0);
+  virtual ~qSlicerTransformVisualizerModule();
 
   qSlicerGetTitleMacro(QTMODULE_TITLE);
 
@@ -66,11 +66,11 @@ protected:
   virtual vtkMRMLAbstractLogic* createLogic();
 
 protected:
-  QScopedPointer<qSlicerDeformationFieldVisualizerModulePrivate> d_ptr;
+  QScopedPointer<qSlicerTransformVisualizerModulePrivate> d_ptr;
 
 private:
-  Q_DECLARE_PRIVATE(qSlicerDeformationFieldVisualizerModule);
-  Q_DISABLE_COPY(qSlicerDeformationFieldVisualizerModule);
+  Q_DECLARE_PRIVATE(qSlicerTransformVisualizerModule);
+  Q_DISABLE_COPY(qSlicerTransformVisualizerModule);
 
 };
 

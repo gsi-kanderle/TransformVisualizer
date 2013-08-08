@@ -20,29 +20,29 @@
 ==============================================================================*/
 
 #pragma once
-#ifndef __vtkMRMLDeformationFieldVisualizerNode_h
-#define __vtkMRMLDeformationFieldVisualizerNode_h
+#ifndef __vtkMRMLTransformVisualizerNode_h
+#define __vtkMRMLTransformVisualizerNode_h
 
 #include <vtkMRML.h>
 #include <vtkMRMLNode.h>
 
-#include "vtkSlicerDeformationFieldVisualizerModuleLogicExport.h"
+#include "vtkSlicerTransformVisualizerModuleLogicExport.h"
 
-/// \ingroup Slicer_QtModules_DeformationFieldVisualizer
-class VTK_SLICER_DEFORMATIONFIELDVISUALIZER_MODULE_LOGIC_EXPORT vtkMRMLDeformationFieldVisualizerNode : 
+/// \ingroup Slicer_QtModules_TransformVisualizer
+class VTK_SLICER_TRANSFORMVISUALIZER_MODULE_LOGIC_EXPORT vtkMRMLTransformVisualizerNode : 
   public vtkMRMLNode
 {
 public:   
 
-  static vtkMRMLDeformationFieldVisualizerNode *New();
-  vtkTypeMacro(vtkMRMLDeformationFieldVisualizerNode, vtkMRMLNode);
+  static vtkMRMLTransformVisualizerNode *New();
+  vtkTypeMacro(vtkMRMLTransformVisualizerNode, vtkMRMLNode);
   void PrintSelf(ostream& os, vtkIndent indent);
 
   virtual vtkMRMLNode* CreateNodeInstance();
   virtual void ReadXMLAttributes( const char** atts);
   virtual void WriteXML(ostream& of, int indent);
   virtual void Copy(vtkMRMLNode *node);
-  virtual const char* GetNodeTagName() {return "DeformationFieldVisualizerParameters";};
+  virtual const char* GetNodeTagName() {return "TransformVisualizerParameters";};
   virtual void UpdateReferenceID(const char *oldID, const char *newID);
 
 public:
@@ -142,11 +142,11 @@ public:
   vtkGetMacro(GridSliceSpacingMM, int);
   
 protected:
-  vtkMRMLDeformationFieldVisualizerNode();
-  ~vtkMRMLDeformationFieldVisualizerNode();
+  vtkMRMLTransformVisualizerNode();
+  ~vtkMRMLTransformVisualizerNode();
 
-  vtkMRMLDeformationFieldVisualizerNode(const vtkMRMLDeformationFieldVisualizerNode&);
-  void operator=(const vtkMRMLDeformationFieldVisualizerNode&);
+  vtkMRMLTransformVisualizerNode(const vtkMRMLTransformVisualizerNode&);
+  void operator=(const vtkMRMLTransformVisualizerNode&);
   
   char* InputVolumeNodeID;
   char* ReferenceVolumeNodeID;

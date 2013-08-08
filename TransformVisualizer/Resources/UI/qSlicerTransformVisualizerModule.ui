@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qSlicerDeformationFieldVisualizerModule</class>
- <widget class="qSlicerWidget" name="qSlicerDeformationFieldVisualizerModule">
+ <class>qSlicerTransformVisualizerModule</class>
+ <widget class="qSlicerWidget" name="qSlicerTransformVisualizerModule">
   <property name="windowModality">
    <enum>Qt::NonModal</enum>
   </property>
@@ -74,7 +74,7 @@
         </property>
         <property name="nodeTypes">
          <stringlist>
-          <string>vtkMRMLDeformationFieldVisualizerNode</string>
+          <string>vtkMRMLTransformVisualizerNode</string>
          </stringlist>
         </property>
         <property name="showHidden">
@@ -368,7 +368,7 @@
          <string>Glyph Slice</string>
         </property>
         <property name="icon">
-         <iconset resource="../qSlicerDeformationFieldVisualizerModule.qrc">
+         <iconset resource="../qSlicerTransformVisualizerModule.qrc">
           <normaloff>:/Icons/GlyphSliceIcon.png</normaloff>:/Icons/GlyphSliceIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -412,7 +412,7 @@
          <string>Grid Slice</string>
         </property>
         <property name="icon">
-         <iconset resource="../qSlicerDeformationFieldVisualizerModule.qrc">
+         <iconset resource="../qSlicerTransformVisualizerModule.qrc">
           <normaloff>:/Icons/GridSliceIcon.png</normaloff>:/Icons/GridSliceIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -453,7 +453,7 @@
          <string>Contour</string>
         </property>
         <property name="icon">
-         <iconset resource="../qSlicerDeformationFieldVisualizerModule.qrc">
+         <iconset resource="../qSlicerTransformVisualizerModule.qrc">
           <normaloff>:/Icons/ContourIcon.png</normaloff>:/Icons/ContourIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -515,7 +515,7 @@
          <string>Glyph</string>
         </property>
         <property name="icon">
-         <iconset resource="../qSlicerDeformationFieldVisualizerModule.qrc">
+         <iconset resource="../qSlicerTransformVisualizerModule.qrc">
           <normaloff>:/Icons/GlyphIcon.png</normaloff>:/Icons/GlyphIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -565,7 +565,7 @@
          <string>Grid</string>
         </property>
         <property name="icon">
-         <iconset resource="../qSlicerDeformationFieldVisualizerModule.qrc">
+         <iconset resource="../qSlicerTransformVisualizerModule.qrc">
           <normaloff>:/Icons/GridIcon.png</normaloff>:/Icons/GridIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -606,7 +606,7 @@
          <string>Block</string>
         </property>
         <property name="icon">
-         <iconset resource="../qSlicerDeformationFieldVisualizerModule.qrc">
+         <iconset resource="../qSlicerTransformVisualizerModule.qrc">
           <normaloff>:/Icons/BlockIcon.png</normaloff>:/Icons/BlockIcon.png</iconset>
         </property>
         <property name="iconSize">
@@ -2192,11 +2192,11 @@ p, li { white-space: pre-wrap; }
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../qSlicerDeformationFieldVisualizerModule.qrc"/>
+  <include location="../qSlicerTransformVisualizerModule.qrc"/>
  </resources>
  <connections>
   <connection>
-   <sender>qSlicerDeformationFieldVisualizerModule</sender>
+   <sender>qSlicerTransformVisualizerModule</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>InputFieldComboBox</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -2212,7 +2212,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>qSlicerDeformationFieldVisualizerModule</sender>
+   <sender>qSlicerTransformVisualizerModule</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>OutputModelComboBox</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -2420,7 +2420,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>qSlicerDeformationFieldVisualizerModule</sender>
+   <sender>qSlicerTransformVisualizerModule</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>ParameterComboBox</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -3396,7 +3396,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>qSlicerDeformationFieldVisualizerModule</sender>
+   <sender>qSlicerTransformVisualizerModule</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>InputReferenceComboBox</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -3412,7 +3412,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>qSlicerDeformationFieldVisualizerModule</sender>
+   <sender>qSlicerTransformVisualizerModule</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>GlyphSliceComboBox</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>
@@ -3428,7 +3428,7 @@ p, li { white-space: pre-wrap; }
    </hints>
   </connection>
   <connection>
-   <sender>qSlicerDeformationFieldVisualizerModule</sender>
+   <sender>qSlicerTransformVisualizerModule</sender>
    <signal>mrmlSceneChanged(vtkMRMLScene*)</signal>
    <receiver>GridSliceComboBox</receiver>
    <slot>setMRMLScene(vtkMRMLScene*)</slot>

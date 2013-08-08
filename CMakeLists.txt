@@ -9,12 +9,12 @@ set(TRANSFORMVISUALIZER_VERSION_PATCH "0")
 set(TRANSFORMVISUALIZER_VERSION ${TRANSFORMVISUALIZER_VERSION_MAJOR}.${TRANSFORMVISUALIZER_VERSION_MINOR}.${TRANSFORMVISUALIZER_VERSION_PATCH})
 
 #-----------------------------------------------------------------------------
-set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Modules/DeformationFieldVisualizer";)
+set(EXTENSION_HOMEPAGE "http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/TransformVisualizer";)
 set(EXTENSION_CATEGORY "Registration")
 set(EXTENSION_CONTRIBUTORS "Franklin King (PerkLab, Queen's University), Csaba Pinter (PerkLab, Queen's University), Andras Lasso (PerkLab, Queen's University)")
-set(EXTENSION_DESCRIPTION " Extension version: ${MATLABBRIDGE_VERSION}.")
+set(EXTENSION_DESCRIPTION " Extension version: ${TRANSFORMVISUALIZER_VERSION}.")
 set(EXTENSION_ICONURL "";)
-set(EXTENSION_SCREENSHOTURLS "";)
+set(EXTENSION_SCREENSHOTURLS "http://www.slicer.org/slicerWiki/images/f/f7/SlicerRT_DefFieldVisGlyphUI.png http://www.slicer.org/slicerWiki/images/a/aa/SlicerRT_DefFieldVisModels.png";)
 
 #-----------------------------------------------------------------------------
 find_package(Slicer REQUIRED)

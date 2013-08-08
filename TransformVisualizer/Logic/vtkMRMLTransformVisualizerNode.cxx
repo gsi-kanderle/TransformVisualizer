@@ -19,7 +19,7 @@
 
 ==============================================================================*/
 
-#include "vtkMRMLDeformationFieldVisualizerNode.h"
+#include "vtkMRMLTransformVisualizerNode.h"
 
 // VTK includes
 #include <vtkCommand.h>
@@ -31,10 +31,10 @@
 #include <vtkMRMLModelNode.h>
 
 //----------------------------------------------------------------------------
-vtkMRMLNodeNewMacro(vtkMRMLDeformationFieldVisualizerNode);
+vtkMRMLNodeNewMacro(vtkMRMLTransformVisualizerNode);
 
 //----------------------------------------------------------------------------
-vtkMRMLDeformationFieldVisualizerNode::vtkMRMLDeformationFieldVisualizerNode(){
+vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode(){
   this->InputVolumeNodeID = NULL;
   this->ReferenceVolumeNodeID = NULL;
   this->OutputModelNodeID = NULL;
@@ -90,7 +90,7 @@ vtkMRMLDeformationFieldVisualizerNode::vtkMRMLDeformationFieldVisualizerNode(){
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLDeformationFieldVisualizerNode::~vtkMRMLDeformationFieldVisualizerNode(){
+vtkMRMLTransformVisualizerNode::~vtkMRMLTransformVisualizerNode(){
   this->SetInputVolumeNodeID(NULL);
   this->SetReferenceVolumeNodeID(NULL);
   this->SetOutputModelNodeID(NULL);
@@ -99,8 +99,8 @@ vtkMRMLDeformationFieldVisualizerNode::~vtkMRMLDeformationFieldVisualizerNode(){
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::ReadXMLAttributes(const char** atts){
-  std::cerr << "Reading DeformationFieldVisualizer parameter node" << std::endl;
+void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
+  std::cerr << "Reading TransformVisualizer parameter node" << std::endl;
   Superclass::ReadXMLAttributes(atts);
 
   const char* attName;
@@ -333,7 +333,7 @@ void vtkMRMLDeformationFieldVisualizerNode::ReadXMLAttributes(const char** atts)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::WriteXML(ostream& of, int nIndent){
+void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent){
   Superclass::WriteXML(of, nIndent);
   vtkIndent indent(nIndent);
 
@@ -382,9 +382,9 @@ void vtkMRMLDeformationFieldVisualizerNode::WriteXML(ostream& of, int nIndent){
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::Copy(vtkMRMLNode *anode){
+void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode){
   Superclass::Copy(anode);
-  vtkMRMLDeformationFieldVisualizerNode *node = vtkMRMLDeformationFieldVisualizerNode::SafeDownCast(anode);
+  vtkMRMLTransformVisualizerNode *node = vtkMRMLTransformVisualizerNode::SafeDownCast(anode);
   this->DisableModifiedEventOn();
 
   this->SetInputVolumeNodeID(node->GetInputVolumeNodeID());
@@ -434,7 +434,7 @@ void vtkMRMLDeformationFieldVisualizerNode::Copy(vtkMRMLNode *anode){
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::UpdateReferenceID(const char *oldID, const char *newID){
+void vtkMRMLTransformVisualizerNode::UpdateReferenceID(const char *oldID, const char *newID){
   if (this->InputVolumeNodeID && !strcmp(oldID, this->InputVolumeNodeID)){
     this->SetAndObserveInputVolumeNodeID(newID);
   }
@@ -453,7 +453,7 @@ void vtkMRMLDeformationFieldVisualizerNode::UpdateReferenceID(const char *oldID,
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveInputVolumeNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveInputVolumeNodeID(const char* id){
   if (this->InputVolumeNodeID){
     this->Scene->RemoveReferencedNodeID(this->InputVolumeNodeID, this);
   }
@@ -466,7 +466,7 @@ void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveInputVolumeNodeID(const
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveReferenceVolumeNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveReferenceVolumeNodeID(const char* id){
   if (this->ReferenceVolumeNodeID){
     this->Scene->RemoveReferencedNodeID(this->ReferenceVolumeNodeID, this);
   }
@@ -479,7 +479,7 @@ void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveReferenceVolumeNodeID(c
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveOutputModelNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveOutputModelNodeID(const char* id){
   if (this->OutputModelNodeID){
     this->Scene->RemoveReferencedNodeID(this->OutputModelNodeID, this);
   }
@@ -492,7 +492,7 @@ void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveOutputModelNodeID(const
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveGlyphSliceNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveGlyphSliceNodeID(const char* id){
   if (this->GlyphSliceNodeID){
     this->Scene->RemoveReferencedNodeID(this->GlyphSliceNodeID, this);
   }
@@ -505,7 +505,7 @@ void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveGlyphSliceNodeID(const 
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveGridSliceNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveGridSliceNodeID(const char* id){
   if (this->GridSliceNodeID){
     this->Scene->RemoveReferencedNodeID(this->GridSliceNodeID, this);
   }
@@ -518,7 +518,7 @@ void vtkMRMLDeformationFieldVisualizerNode::SetAndObserveGridSliceNodeID(const c
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLDeformationFieldVisualizerNode::PrintSelf(ostream& os, vtkIndent indent){
+void vtkMRMLTransformVisualizerNode::PrintSelf(ostream& os, vtkIndent indent){
   Superclass::PrintSelf(os,indent);
 
   os << indent << " InputNodeID = " << (this->InputVolumeNodeID ? this->InputVolumeNodeID : "NULL") << "\n";

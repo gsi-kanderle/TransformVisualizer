@@ -1,21 +1,21 @@
-#ifndef __vtkDeformationFieldVisualizerGlyph3D_h
-#define __vtkDeformationFieldVisualizerGlyph3D_h
+#ifndef __vtkTransformVisualizerGlyph3D_h
+#define __vtkTransformVisualizerGlyph3D_h
 
 #include "vtkGlyph3D.h"
 #include <vtkSmartPointer.h>
 #include "vtkMinimalStandardRandomSequence.h"
 
-#include "vtkSlicerDeformationFieldVisualizerModuleLogicExport.h"
+#include "vtkSlicerTransformVisualizerModuleLogicExport.h"
 
 class vtkMinimalStandardRandomSequence;
 
 //------------------------------------------------------------------------------
-class VTK_SLICER_DEFORMATIONFIELDVISUALIZER_MODULE_LOGIC_EXPORT vtkDeformationFieldVisualizerGlyph3D : public vtkGlyph3D
+class VTK_SLICER_TRANSFORMVISUALIZER_MODULE_LOGIC_EXPORT vtkTransformVisualizerGlyph3D : public vtkGlyph3D
 {
 public:
-  vtkTypeMacro(vtkDeformationFieldVisualizerGlyph3D,vtkGlyph3D);
+  vtkTypeMacro(vtkTransformVisualizerGlyph3D,vtkGlyph3D);
   void PrintSelf(ostream& os, vtkIndent indent);
-  static vtkDeformationFieldVisualizerGlyph3D *New();
+  static vtkTransformVisualizerGlyph3D *New();
 
   virtual int IsPointVisibleForListIndex(double vmag, vtkIdType ptId, int visibleListIndex);
 
@@ -33,8 +33,8 @@ public:
   vtkGetMacro(MagnitudeMin,double);
   
 protected:
-  vtkDeformationFieldVisualizerGlyph3D();
-  ~vtkDeformationFieldVisualizerGlyph3D() {};
+  vtkTransformVisualizerGlyph3D();
+  ~vtkTransformVisualizerGlyph3D() {};
   
   int PointMax;
   double ScaleFactor;
@@ -46,8 +46,8 @@ protected:
   virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 
 private:
-  vtkDeformationFieldVisualizerGlyph3D(const vtkDeformationFieldVisualizerGlyph3D&);  // Not implemented.
-  void operator=(const vtkDeformationFieldVisualizerGlyph3D&);  // Not implemented.
+  vtkTransformVisualizerGlyph3D(const vtkTransformVisualizerGlyph3D&);  // Not implemented.
+  void operator=(const vtkTransformVisualizerGlyph3D&);  // Not implemented.
 };
 
 #endif

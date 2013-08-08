@@ -1,6 +1,6 @@
 <!DOCTYPE RCC><RCC version="1.0">
   <qresource>
-    <file>Icons/DeformationFieldVisualizer.png</file>
+    <file>Icons/TransformVisualizer.png</file>
 	<file>Icons/GlyphIcon.png</file>
 	<file>Icons/GridIcon.png</file>
 	<file>Icons/BlockIcon.png</file>

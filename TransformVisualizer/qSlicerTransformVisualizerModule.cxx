@@ -22,63 +22,63 @@
 // Qt includes
 #include <QtPlugin>
 
-// DeformationFieldVisualizer Logic includes
-#include <vtkSlicerDeformationFieldVisualizerLogic.h>
+// TransformVisualizer Logic includes
+#include <vtkSlicerTransformVisualizerLogic.h>
 
-// DeformationFieldVisualizer includes
-#include "qSlicerDeformationFieldVisualizerModule.h"
-#include "qSlicerDeformationFieldVisualizerModuleWidget.h"
-
-//-----------------------------------------------------------------------------
-Q_EXPORT_PLUGIN2(qSlicerDeformationFieldVisualizerModule, qSlicerDeformationFieldVisualizerModule);
+// TransformVisualizer includes
+#include "qSlicerTransformVisualizerModule.h"
+#include "qSlicerTransformVisualizerModuleWidget.h"
 
 //-----------------------------------------------------------------------------
-/// \ingroup Slicer_QtModules_DeformationFieldVisualizer
-class qSlicerDeformationFieldVisualizerModulePrivate
+Q_EXPORT_PLUGIN2(qSlicerTransformVisualizerModule, qSlicerTransformVisualizerModule);
+
+//-----------------------------------------------------------------------------
+/// \ingroup Slicer_QtModules_TransformVisualizer
+class qSlicerTransformVisualizerModulePrivate
 {
 public:
-  qSlicerDeformationFieldVisualizerModulePrivate();
+  qSlicerTransformVisualizerModulePrivate();
 };
 
 //-----------------------------------------------------------------------------
-// qSlicerDeformationFieldVisualizerModulePrivate methods
+// qSlicerTransformVisualizerModulePrivate methods
 
 //-----------------------------------------------------------------------------
-qSlicerDeformationFieldVisualizerModulePrivate
-::qSlicerDeformationFieldVisualizerModulePrivate()
+qSlicerTransformVisualizerModulePrivate
+::qSlicerTransformVisualizerModulePrivate()
 {
 }
 
 //-----------------------------------------------------------------------------
-// qSlicerDeformationFieldVisualizerModule methods
+// qSlicerTransformVisualizerModule methods
 
 //-----------------------------------------------------------------------------
-qSlicerDeformationFieldVisualizerModule
-::qSlicerDeformationFieldVisualizerModule(QObject* _parent)
+qSlicerTransformVisualizerModule
+::qSlicerTransformVisualizerModule(QObject* _parent)
   : Superclass(_parent)
-  , d_ptr(new qSlicerDeformationFieldVisualizerModulePrivate)
+  , d_ptr(new qSlicerTransformVisualizerModulePrivate)
 {
 }
 
 //-----------------------------------------------------------------------------
-qSlicerDeformationFieldVisualizerModule::~qSlicerDeformationFieldVisualizerModule()
+qSlicerTransformVisualizerModule::~qSlicerTransformVisualizerModule()
 {
 }
 
 //-----------------------------------------------------------------------------
-QString qSlicerDeformationFieldVisualizerModule::helpText()const
+QString qSlicerTransformVisualizerModule::helpText()const
 {
-  return "TODO: This is a placeholder help text.";
+  return "The Transform Visualizer module visualizes transforms using various options. The module can visualize any transform (linear transform, B-spline deformable transform, any other non-linear transform) or vector volume. See <a>http://www.slicer.org/slicerWiki/index.php/Documentation/Nightly/Extensions/TransformVisualizer</a> for more information.";
 }
 
 //-----------------------------------------------------------------------------
-QString qSlicerDeformationFieldVisualizerModule::acknowledgementText()const
+QString qSlicerTransformVisualizerModule::acknowledgementText()const
 {
   return "This work is part of SparKit project, funded by Cancer Care Ontario (CCO)'s ACRU program and Ontario Consortium for Adaptive Interventions in Radiation Oncology (OCAIRO).";
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerDeformationFieldVisualizerModule::contributors()const
+QStringList qSlicerTransformVisualizerModule::contributors()const
 {
   QStringList moduleContributors;
   moduleContributors << QString("Franklin King") << QString("Andras Lasso") << QString("Csaba Pinter");
@@ -86,38 +86,38 @@ QStringList qSlicerDeformationFieldVisualizerModule::contributors()const
 }
 
 //-----------------------------------------------------------------------------
-QIcon qSlicerDeformationFieldVisualizerModule::icon()const
+QIcon qSlicerTransformVisualizerModule::icon()const
 {
-  return QIcon(":/Icons/DeformationFieldVisualizer.png");
+  return QIcon(":/Icons/TransformVisualizer.png");
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerDeformationFieldVisualizerModule::categories() const
+QStringList qSlicerTransformVisualizerModule::categories() const
 {
   return QStringList() << "Registration";
 }
 
 //-----------------------------------------------------------------------------
-QStringList qSlicerDeformationFieldVisualizerModule::dependencies() const
+QStringList qSlicerTransformVisualizerModule::dependencies() const
 {
   return QStringList();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerDeformationFieldVisualizerModule::setup()
+void qSlicerTransformVisualizerModule::setup()
 {
   this->Superclass::setup();
 }
 
 //-----------------------------------------------------------------------------
-qSlicerAbstractModuleRepresentation * qSlicerDeformationFieldVisualizerModule
+qSlicerAbstractModuleRepresentation * qSlicerTransformVisualizerModule
 ::createWidgetRepresentation()
 {
-  return new qSlicerDeformationFieldVisualizerModuleWidget;
+  return new qSlicerTransformVisualizerModuleWidget;
 }
 
 //-----------------------------------------------------------------------------
-vtkMRMLAbstractLogic* qSlicerDeformationFieldVisualizerModule::createLogic()
+vtkMRMLAbstractLogic* qSlicerTransformVisualizerModule::createLogic()
 {
-  return vtkSlicerDeformationFieldVisualizerLogic::New();
+  return vtkSlicerTransformVisualizerLogic::New();
 }
