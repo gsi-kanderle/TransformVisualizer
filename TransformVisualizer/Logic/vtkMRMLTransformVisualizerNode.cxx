@@ -34,26 +34,29 @@
 vtkMRMLNodeNewMacro(vtkMRMLTransformVisualizerNode);
 
 //----------------------------------------------------------------------------
-vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode(){
-  this->InputVolumeNodeID = NULL;
+vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode()
+{
+  this->InputNodeID = NULL;
   this->ReferenceVolumeNodeID = NULL;
   this->OutputModelNodeID = NULL;
     
   //Glyph Parameters
   this->GlyphPointMax = 2000;
   this->GlyphScale = 1;
-  this->GlyphScaleDirectional = true;
-  this->GlyphScaleIsotropic = false;
-  this->GlyphThresholdMax = 0;
+  this->GlyphThresholdMax = 1000;
   this->GlyphThresholdMin = 0;
   this->GlyphSeed = 687848400;
   this->GlyphSourceOption = 0;
   //Arrow Parameters
+  this->GlyphArrowScaleDirectional = true;
+  this->GlyphArrowScaleIsotropic = false;  
   this->GlyphArrowTipLength = 0.35;
   this->GlyphArrowTipRadius = 0.5;
   this->GlyphArrowShaftRadius = 0.15;
   this->GlyphArrowResolution = 6;
   //Cone Parameters
+  this->GlyphConeScaleDirectional = true;
+  this->GlyphConeScaleIsotropic = false;
   this->GlyphConeHeight = 1.0;
   this->GlyphConeRadius = 0.6;
   this->GlyphConeResolution = 6;
@@ -69,15 +72,15 @@ vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode(){
   this->BlockDisplacementCheck = 0;
     
   //Contour Parameters
-  this->ContourNumber = 10;
-  this->ContourMin = 0;
-  this->ContourMax = 6;
+  //Temporary Initialization
+  this->ContourNumber = 0;
+  this->ContourValues = NULL;
   this->ContourDecimation = 0.25;
 
   //Glyph Slice Parameters
   this->GlyphSliceNodeID = NULL;
   this->GlyphSlicePointMax = 6000;
-  this->GlyphSliceThresholdMax = 0;
+  this->GlyphSliceThresholdMax = 1000;
   this->GlyphSliceThresholdMin = 0;  
   this->GlyphSliceScale = 1;
   this->GlyphSliceSeed = 687848400;
@@ -90,16 +93,19 @@ vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode(){
 }
 
 //----------------------------------------------------------------------------
-vtkMRMLTransformVisualizerNode::~vtkMRMLTransformVisualizerNode(){
-  this->SetInputVolumeNodeID(NULL);
+vtkMRMLTransformVisualizerNode::~vtkMRMLTransformVisualizerNode()
+{
+  this->SetInputNodeID(NULL);
   this->SetReferenceVolumeNodeID(NULL);
   this->SetOutputModelNodeID(NULL);
   this->SetGlyphSliceNodeID(NULL);
   this->SetGridSliceNodeID(NULL);
+  delete[] this->ContourValues;
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
+void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts)
+{
   std::cerr << "Reading TransformVisualizer parameter node" << std::endl;
   Superclass::ReadXMLAttributes(atts);
 
@@ -109,8 +115,8 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
     attName = *(atts++);
     attValue = *(atts++);
     
-    if (!strcmp(attName, "InputVolumeNodeID")){
-      this->SetInputVolumeNodeID(attValue);
+    if (!strcmp(attName, "InputNodeID")){
+      this->SetInputNodeID(attValue);
       continue;
     }
     if (!strcmp(attName, "ReferenceVolumeNodeID")){
@@ -134,18 +140,6 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
       ss >> this->GlyphScale;
       continue;
     }    
-    if (!strcmp(attName,"GlyphScaleDirectional")){
-      std::stringstream ss;
-      ss << attValue;
-      ss >> this->GlyphScaleDirectional;
-      continue;
-    }
-    if (!strcmp(attName,"GlyphScaleIsotropic")){
-      std::stringstream ss;
-      ss << attValue;
-      ss >> this->GlyphScaleIsotropic;
-      continue;
-    }
     if (!strcmp(attName,"GlyphThresholdMax")){
       std::stringstream ss;
       ss << attValue;
@@ -170,6 +164,18 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
       ss >> this->GlyphSourceOption;
       continue;
     }
+      if (!strcmp(attName,"GlyphArrowScaleDirectional")){
+        std::stringstream ss;
+        ss << attValue;
+        ss >> this->GlyphArrowScaleDirectional;
+        continue;
+      }
+      if (!strcmp(attName,"GlyphArrowScaleIsotropic")){
+        std::stringstream ss;
+        ss << attValue;
+        ss >> this->GlyphArrowScaleIsotropic;
+        continue;
+      }    
       if (!strcmp(attName,"GlyphArrowTipLength")){
         std::stringstream ss;
         ss << attValue;
@@ -195,6 +201,18 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
         continue;
       }
       
+      if (!strcmp(attName,"GlyphConeScaleDirectional")){
+        std::stringstream ss;
+        ss << attValue;
+        ss >> this->GlyphConeScaleDirectional;
+        continue;
+      }
+      if (!strcmp(attName,"GlyphConeScaleIsotropic")){
+        std::stringstream ss;
+        ss << attValue;
+        ss >> this->GlyphConeScaleIsotropic;
+        continue;
+      }
       if (!strcmp(attName,"GlyphConeHeight")){
         std::stringstream ss;
         ss << attValue;
@@ -247,24 +265,21 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
       continue;
     }      
     
+    
     if (!strcmp(attName,"ContourNumber")){
       std::stringstream ss;
       ss << attValue;
       ss >> this->ContourNumber;
       continue;
     }
-    if (!strcmp(attName,"ContourMin")){
+    /*
+    if (!strcmp(attName,"ContourValues")){
       std::stringstream ss;
       ss << attValue;
-      ss >> this->ContourMin;
+      ss >> this->ContourValues;
       continue;
     }
-    if (!strcmp(attName,"ContourMax")){
-      std::stringstream ss;
-      ss << attValue;
-      ss >> this->ContourMax;
-      continue;
-    }
+    */
     if (!strcmp(attName,"ContourDecimation")){
       std::stringstream ss;
       ss << attValue;
@@ -333,26 +348,29 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts){
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent){
+void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent)
+{
   Superclass::WriteXML(of, nIndent);
   vtkIndent indent(nIndent);
 
-  of << indent << " InputVolumeNodeID=\"" << (this->InputVolumeNodeID ? this->InputVolumeNodeID : "NULL") << "\"";
+  of << indent << " InputNodeID=\"" << (this->InputNodeID ? this->InputNodeID : "NULL") << "\"";
   of << indent << " ReferenceVolumeNodeID=\"" << (this->ReferenceVolumeNodeID ? this->ReferenceVolumeNodeID : "NULL") << "\"";
   of << indent << " OutputModelNodeID=\"" << (this->OutputModelNodeID ? this->OutputModelNodeID : "NULL") << "\"";
   
   of << indent << " GlyphPointMax=\""<< this->GlyphPointMax << "\"";
   of << indent << " GlyphScale=\""<< this->GlyphScale << "\"";
-  of << indent << " GlyphScaleDirectional=\"" << this->GlyphScaleDirectional << "\"";
-  of << indent << " GlyphScaleIsotropic=\"" << this->GlyphScaleIsotropic << "\"";
   of << indent << " GlyphThresholdMax=\""<< this->GlyphThresholdMax << "\"";
   of << indent << " GlyphThresholdMin=\""<< this->GlyphThresholdMin << "\"";
   of << indent << " GlyphSeed=\""<< this->GlyphSeed << "\"";
   of << indent << " GlyphSourceOption=\""<< this->GlyphSourceOption << "\"";
+    of << indent << " GlyphArrowScaleDirectional=\"" << this->GlyphArrowScaleDirectional << "\"";
+    of << indent << " GlyphArrowScaleIsotropic=\"" << this->GlyphArrowScaleIsotropic << "\"";
     of << indent << " GlyphArrowTipLength=\"" << this->GlyphArrowTipLength << "\"";
     of << indent << " GlyphArrowTipRadius=\""<< this->GlyphArrowTipRadius << "\"";
     of << indent << " GlyphArrowShaftRadius=\"" << this->GlyphArrowShaftRadius << "\"";
     of << indent << " GlyphArrowResolution=\"" << this->GlyphArrowResolution << "\"";
+    of << indent << " GlyphConeScaleDirectional=\"" << this->GlyphConeScaleDirectional << "\"";
+    of << indent << " GlyphConeScaleIsotropic=\"" << this->GlyphConeScaleIsotropic << "\"";
     of << indent << " GlyphConeHeight=\"" << this->GlyphConeHeight << "\"";
     of << indent << " GlyphConeRadius=\"" << this->GlyphConeRadius << "\"";
     of << indent << " GlyphConeResolution=\"" << this->GlyphConeResolution << "\"";
@@ -365,8 +383,7 @@ void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent){
   of << indent << " BlockDisplacementCheck=\""<< this->BlockDisplacementCheck << "\"";
   
   of << indent << " ContourNumber=\""<< this->ContourNumber << "\"";
-  of << indent << " ContourMin=\""<< this->ContourMin << "\"";
-  of << indent << " ContourMax=\""<< this->ContourMax << "\"";
+  //of << indent << " ContourValues=\""<< this->ContourValues << "\"";
   of << indent << " ContourDecimation=\""<< this->ContourDecimation << "\"";
 
   of << indent << " GlyphSliceNodeID=\"" << (this->GlyphSliceNodeID ? this->GlyphSliceNodeID : "NULL") << "\"";  
@@ -382,26 +399,29 @@ void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent){
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode){
+void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode)
+{
   Superclass::Copy(anode);
   vtkMRMLTransformVisualizerNode *node = vtkMRMLTransformVisualizerNode::SafeDownCast(anode);
   this->DisableModifiedEventOn();
 
-  this->SetInputVolumeNodeID(node->GetInputVolumeNodeID());
+  this->SetInputNodeID(node->GetInputNodeID());
   this->SetReferenceVolumeNodeID(node->GetReferenceVolumeNodeID());
   this->SetOutputModelNodeID(node->GetOutputModelNodeID());
   
   this->GlyphPointMax = node->GlyphPointMax;
-  this->GlyphScaleDirectional = node->GlyphScaleDirectional;
-  this->GlyphScaleIsotropic = node->GlyphScaleIsotropic;
   this->GlyphThresholdMax = node->GlyphThresholdMax;
   this->GlyphThresholdMin = node->GlyphThresholdMin;  
   this->GlyphSeed = node->GlyphSeed;
   this->GlyphSourceOption = node->GlyphSourceOption;
+    this->GlyphArrowScaleDirectional = node->GlyphArrowScaleDirectional;
+    this->GlyphArrowScaleIsotropic = node->GlyphArrowScaleIsotropic;  
     this->GlyphArrowTipLength = node->GlyphArrowTipLength;
     this->GlyphArrowTipRadius = node->GlyphArrowTipRadius;
     this->GlyphArrowShaftRadius = node->GlyphArrowShaftRadius;
     this->GlyphArrowResolution = node->GlyphArrowResolution;
+    this->GlyphConeScaleDirectional = node->GlyphConeScaleDirectional;
+    this->GlyphConeScaleIsotropic = node->GlyphConeScaleIsotropic;      
     this->GlyphConeHeight = node->GlyphConeHeight;
     this->GlyphConeRadius = node->GlyphConeRadius;
     this->GlyphConeResolution = node->GlyphConeResolution;
@@ -414,8 +434,7 @@ void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode){
   this->BlockDisplacementCheck = node->BlockDisplacementCheck;
   
   this->ContourNumber = node->ContourNumber;
-  this->ContourMin = node->ContourMin;
-  this->ContourMax = node->ContourMax;
+  //this->ContourValues = node->ContourValues;
   this->ContourDecimation = node->ContourDecimation;
 
   this->GlyphSliceNodeID = (node->GetGlyphSliceNodeID());
@@ -434,9 +453,10 @@ void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode){
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::UpdateReferenceID(const char *oldID, const char *newID){
-  if (this->InputVolumeNodeID && !strcmp(oldID, this->InputVolumeNodeID)){
-    this->SetAndObserveInputVolumeNodeID(newID);
+void vtkMRMLTransformVisualizerNode::UpdateReferenceID(const char *oldID, const char *newID)
+{
+  if (this->InputNodeID && !strcmp(oldID, this->InputNodeID)){
+    this->SetAndObserveInputNodeID(newID);
   }
 
   if (this->OutputModelNodeID && !strcmp(oldID, this->OutputModelNodeID)){
@@ -453,20 +473,22 @@ void vtkMRMLTransformVisualizerNode::UpdateReferenceID(const char *oldID, const 
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveInputVolumeNodeID(const char* id){
-  if (this->InputVolumeNodeID){
-    this->Scene->RemoveReferencedNodeID(this->InputVolumeNodeID, this);
+void vtkMRMLTransformVisualizerNode::SetAndObserveInputNodeID(const char* id)
+{
+  if (this->InputNodeID){
+    this->Scene->RemoveReferencedNodeID(this->InputNodeID, this);
   }
   
-  this->SetInputVolumeNodeID(id);
+  this->SetInputNodeID(id);
   
   if (id){
-    this->Scene->AddReferencedNodeID(this->InputVolumeNodeID, this);
+    this->Scene->AddReferencedNodeID(this->InputNodeID, this);
   }
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveReferenceVolumeNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveReferenceVolumeNodeID(const char* id)
+{
   if (this->ReferenceVolumeNodeID){
     this->Scene->RemoveReferencedNodeID(this->ReferenceVolumeNodeID, this);
   }
@@ -479,7 +501,8 @@ void vtkMRMLTransformVisualizerNode::SetAndObserveReferenceVolumeNodeID(const ch
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveOutputModelNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveOutputModelNodeID(const char* id)
+{
   if (this->OutputModelNodeID){
     this->Scene->RemoveReferencedNodeID(this->OutputModelNodeID, this);
   }
@@ -492,7 +515,8 @@ void vtkMRMLTransformVisualizerNode::SetAndObserveOutputModelNodeID(const char* 
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveGlyphSliceNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveGlyphSliceNodeID(const char* id)
+{
   if (this->GlyphSliceNodeID){
     this->Scene->RemoveReferencedNodeID(this->GlyphSliceNodeID, this);
   }
@@ -505,7 +529,8 @@ void vtkMRMLTransformVisualizerNode::SetAndObserveGlyphSliceNodeID(const char* i
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveGridSliceNodeID(const char* id){
+void vtkMRMLTransformVisualizerNode::SetAndObserveGridSliceNodeID(const char* id)
+{
   if (this->GridSliceNodeID){
     this->Scene->RemoveReferencedNodeID(this->GridSliceNodeID, this);
   }
@@ -518,24 +543,47 @@ void vtkMRMLTransformVisualizerNode::SetAndObserveGridSliceNodeID(const char* id
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::PrintSelf(ostream& os, vtkIndent indent){
+void vtkMRMLTransformVisualizerNode::SetContourValues(double* values, int size)
+{
+  if (this->ContourValues) { delete [] this->ContourValues; }
+  if (values)
+  {
+    this->ContourValues = values;
+  }
+  else
+  {
+    this->ContourValues = NULL;
+  }
+}
+
+//----------------------------------------------------------------------------
+double* vtkMRMLTransformVisualizerNode::GetContourValues()
+{
+  return this->ContourValues;
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLTransformVisualizerNode::PrintSelf(ostream& os, vtkIndent indent)
+{
   Superclass::PrintSelf(os,indent);
 
-  os << indent << " InputNodeID = " << (this->InputVolumeNodeID ? this->InputVolumeNodeID : "NULL") << "\n";
+  os << indent << " InputNodeID = " << (this->InputNodeID ? this->InputNodeID : "NULL") << "\n";
   os << indent << " ReferenceNodeID = " << (this->ReferenceVolumeNodeID ? this->ReferenceVolumeNodeID : "NULL") << "\n";  
   os << indent << " OutputModelNodeID = " << (this->OutputModelNodeID ? this->OutputModelNodeID : "NULL") << "\n";
   os << indent << " GlyphPointMax = "<< this->GlyphPointMax << "\n";
   os << indent << " GlyphScale = "<< this->GlyphScale << "\n";
-  os << indent << " GlyphScaleDirectional = " << this->GlyphScaleDirectional << "\n";
-  os << indent << " GlyphScaleIsotropic =  " << this->GlyphScaleIsotropic << "\n";
   os << indent << " GlyphThresholdMax = "<< this->GlyphThresholdMax << "\n";
   os << indent << " GlyphThresholdMin = "<< this->GlyphThresholdMin << "\n";  
   os << indent << " GlyphSeed = "<< this->GlyphSeed << "\n";
-  os << indent << " GlyphSourceOption = "<< this->GlyphSourceOption << "\n";  
+  os << indent << " GlyphSourceOption = "<< this->GlyphSourceOption << "\n";
+    os << indent << "   GlyphArrowScaleDirectional = " << this->GlyphArrowScaleDirectional << "\n";
+    os << indent << "   GlyphArrowScaleIsotropic =  " << this->GlyphArrowScaleIsotropic << "\n";
     os << indent << "   GlyphArrowTipLength = " << this->GlyphArrowTipLength << "\n";
     os << indent << "   GlyphArrowTipRadius = "<< this->GlyphArrowTipRadius << "\n";
     os << indent << "   GlyphArrowShaftRadius =  " << this->GlyphArrowShaftRadius << "\n";
     os << indent << "   GlyphArrowResolution = " << this->GlyphArrowResolution << "\n";
+    os << indent << "   GlyphConeScaleDirectional = " << this->GlyphConeScaleDirectional << "\n";
+    os << indent << "   GlyphConeScaleIsotropic =  " << this->GlyphConeScaleIsotropic << "\n";
     os << indent << "   GlyphConeHeight = " << this->GlyphConeHeight << "\n";
     os << indent << "   GlyphConeRadius = " << this->GlyphConeRadius << "\n";
     os << indent << "   GlyphConeResolution = " << this->GlyphConeResolution << "\n";
@@ -548,8 +596,7 @@ void vtkMRMLTransformVisualizerNode::PrintSelf(ostream& os, vtkIndent indent){
   os << indent << " BlockDisplacementCheck = "<< this->BlockDisplacementCheck << "\n";
   
   os << indent << " ContourNumber = "<< this->ContourNumber << "\n";
-  os << indent << " ContourMin = "<< this->ContourMin << "\n";
-  os << indent << " ContourMax = "<< this->ContourMax << "\n";
+  //os << indent << " ContourValues = "<< this->ContourValues << "\n";
   os << indent << " ContourDecimation = "<< this->ContourDecimation << "\n";
 
   os << indent << " GlyphSliceNodeID = " << (this->GlyphSliceNodeID ? this->GlyphSliceNodeID : "NULL") << "\n";  

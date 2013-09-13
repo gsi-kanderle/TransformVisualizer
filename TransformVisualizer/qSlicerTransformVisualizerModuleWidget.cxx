@@ -48,7 +48,6 @@
 
 //-----------------------------------------------------------------------------
 /// \ingroup Slicer_QtModules_TransformVisualizer
-// TODO: Keeping private for now until after fixes and enhancements
 class qSlicerTransformVisualizerModuleWidgetPrivate: public Ui_qSlicerTransformVisualizerModule{
   Q_DECLARE_PUBLIC(qSlicerTransformVisualizerModuleWidget);
 protected:
@@ -87,10 +86,7 @@ qSlicerTransformVisualizerModuleWidget::~qSlicerTransformVisualizerModuleWidget(
 void qSlicerTransformVisualizerModuleWidget::setMRMLScene(vtkMRMLScene* scene)
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
-
   this->Superclass::setMRMLScene(scene);
-
-  // Find parameters node or create it if there is no one in the scene
   if (scene &&  d->logic()->GetTransformVisualizerNode() == 0)
   {
     vtkMRMLNode* node = scene->GetNthNodeByClass(0, "vtkMRMLTransformVisualizerNode");
@@ -116,21 +112,16 @@ void qSlicerTransformVisualizerModuleWidget::enter()
 //-----------------------------------------------------------------------------
 void qSlicerTransformVisualizerModuleWidget::onEnter()
 {
-  if (!this->mrmlScene())
-  {
-    return;
-  }
-
   Q_D(qSlicerTransformVisualizerModuleWidget);
-
-  if (d->logic() == NULL)
+  
+  if (!this->mrmlScene() || d->logic() == NULL)
   {
+    std::cerr << "Error: Unable to initialize module" << std::endl;
     return;
   }
 
   //Check for existing parameter node
   vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-
   if (pNode == NULL)
   {
     vtkMRMLNode* node = this->mrmlScene()->GetNthNodeByClass(0, "vtkMRMLTransformVisualizerNode");
@@ -138,7 +129,6 @@ void qSlicerTransformVisualizerModuleWidget::onEnter()
     {
       pNode = vtkMRMLTransformVisualizerNode::SafeDownCast(node);
       d->logic()->SetAndObserveTransformVisualizerNode(pNode);
-      return;
     }
     else
     {
@@ -147,306 +137,152 @@ void qSlicerTransformVisualizerModuleWidget::onEnter()
       d->logic()->SetAndObserveTransformVisualizerNode(newNode);
     }
   }
-  this->updateWidgetFromMRML();
+  this->update();
 }
 
 //-----------------------------------------------------------------------------
 void qSlicerTransformVisualizerModuleWidget::setTransformVisualizerParametersNode(vtkMRMLNode *node)
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
-
+  
   vtkMRMLTransformVisualizerNode* pNode = vtkMRMLTransformVisualizerNode::SafeDownCast(node);
-
-  qvtkReconnect( d->logic()->GetTransformVisualizerNode(), pNode, vtkCommand::ModifiedEvent, this, SLOT(updateWidgetFromMRML()));
-
+  qvtkReconnect( d->logic()->GetTransformVisualizerNode(), pNode, vtkCommand::ModifiedEvent, this, SLOT(update()));
   d->logic()->SetAndObserveTransformVisualizerNode(pNode);
-
-  this->updateWidgetFromMRML();
+  this->update();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::updateWidgetFromMRML()
+void qSlicerTransformVisualizerModuleWidget::update()
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
 
   vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-
-  if (pNode && this->mrmlScene())
+  if (pNode == NULL || this->mrmlScene() == NULL)
   {
-    d->ParameterComboBox->setCurrentNode(pNode);
-
-    if (pNode->GetInputVolumeNodeID())
-    {
-      d->InputFieldComboBox->setCurrentNodeID(pNode->GetInputVolumeNodeID());
-    }
-    else
-    {
-      this->inputVolumeChanged(d->InputFieldComboBox->currentNode());
-    }
-
-    if (pNode->GetReferenceVolumeNodeID())
-    {
-      d->InputReferenceComboBox->setCurrentNodeID(pNode->GetReferenceVolumeNodeID());
-    }
-    else
-    {
-      this->referenceVolumeChanged(d->InputReferenceComboBox->currentNode());
-    }    
-
-    if (pNode->GetOutputModelNodeID())
-    {
-      d->OutputModelComboBox->setCurrentNodeID(pNode->GetOutputModelNodeID());
-    }
-    else
-    {
-      this->outputModelChanged(d->OutputModelComboBox->currentNode());
-    }  
-
-    //Update Visualization Parameters
-
-    // Glyph Parameters
-    d->InputGlyphPointMax->setValue(pNode->GetGlyphPointMax());
-    d->InputGlyphSeed->setValue(pNode->GetGlyphSeed());
-    d->InputGlyphScale->setValue(pNode->GetGlyphScale());
-    d->InputGlyphScaleDirectional->setChecked(pNode->GetGlyphScaleDirectional());
-    d->InputGlyphScaleIsotropic->setChecked(pNode->GetGlyphScaleIsotropic());
-    d->InputGlyphThreshold->setMaximumValue(pNode->GetGlyphThresholdMax());
-    d->InputGlyphThreshold->setMinimumValue(pNode->GetGlyphThresholdMin());
-    d->GlyphSourceComboBox->setCurrentIndex(pNode->GetGlyphSourceOption());
-    // Arrow Parameters
-    d->InputGlyphArrowTipLength->setValue(pNode->GetGlyphArrowTipLength());
-    d->InputGlyphArrowTipRadius->setValue(pNode->GetGlyphArrowTipRadius());
-    d->InputGlyphArrowShaftRadius->setValue(pNode->GetGlyphArrowShaftRadius());
-    d->InputGlyphArrowResolution->setValue(pNode->GetGlyphArrowResolution());
-    // Cone Parameters
-    d->InputGlyphConeHeight->setValue(pNode->GetGlyphConeHeight());
-    d->InputGlyphConeRadius->setValue(pNode->GetGlyphConeRadius());
-    d->InputGlyphConeResolution->setValue(pNode->GetGlyphConeResolution());
-    // Sphere Parameters
-    d->InputGlyphSphereResolution->setValue(pNode->GetGlyphSphereResolution());
-
-    // Grid Parameters
-    d->InputGridScale->setValue(pNode->GetGridScale());
-    d->InputGridSpacing->setValue(pNode->GetGridSpacingMM());
-
-    // Block Parameters
-    d->InputBlockScale->setValue(pNode->GetBlockScale());
-    d->InputBlockDisplacementCheck->setChecked(pNode->GetBlockDisplacementCheck());
-
-    // Contour Parameters
-    d->InputContourNumber->setValue(pNode->GetContourNumber());
-    d->InputContourRange->setMaximumValue(pNode->GetContourMax());
-    d->InputContourRange->setMinimumValue(pNode->GetContourMin());
-    d->InputContourDecimation->setValue(pNode->GetContourDecimation());
-
-    // Glyph Slice Parameters
-    if (pNode->GetGlyphSliceNodeID())
-    {
-      d->GlyphSliceComboBox->setCurrentNodeID(pNode->GetGlyphSliceNodeID());
-    }
-    else
-    {
-      this->setGlyphSliceNode(d->GlyphSliceComboBox->currentNode());
-    }  
-    d->InputGlyphSlicePointMax->setValue(pNode->GetGlyphSlicePointMax());
-    d->InputGlyphSliceThreshold->setMaximumValue(pNode->GetGlyphSliceThresholdMax());
-    d->InputGlyphSliceThreshold->setMinimumValue(pNode->GetGlyphSliceThresholdMin());
-    d->InputGlyphSliceScale->setValue(pNode->GetGlyphSliceScale());
-    d->InputGlyphSliceSeed->setValue(pNode->GetGlyphSliceSeed());
-
-    // Grid Slice Parameters
-    if (pNode->GetGridSliceNodeID())
-    {
-      d->GridSliceComboBox->setCurrentNodeID(pNode->GetGridSliceNodeID());
-    }
-    else
-    {
-      this->setGridSliceNode(d->GridSliceComboBox->currentNode());
-    }  
-    d->InputGridSliceScale->setValue(pNode->GetGridSliceScale());
-    d->InputGridSliceSpacing->setValue(pNode->GetGridSliceSpacingMM());
-  }
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::onLogicModified()
-{
-  this->updateWidgetFromMRML();
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::inputVolumeChanged(vtkMRMLNode* node)
-{
-  Q_D(qSlicerTransformVisualizerModuleWidget);
-
-  // TODO: Move into updatefrommrml?
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene() || !node)
-  {
-    d->ApplyButton->setEnabled(false);
-    d->VolumeDisabledLabel->show();
+    std::cerr << "Error: Unable to update widget" << std::endl;
     return;
   }
-
-  d->ApplyButton->setEnabled(true);
-  d->VolumeDisabledLabel->hide();  
-
-  pNode->DisableModifiedEventOn();
-  pNode->SetAndObserveInputVolumeNodeID(node->GetID());
-  pNode->DisableModifiedEventOff();
   
-  double* range;
-  
-  // What to do if there is more than one array? Would there be more than one array?
-  if (strcmp(node->GetClassName(), "vtkMRMLVectorVolumeNode") == 0)
-  {
-    d->InputReferenceComboBox->setEnabled(false);
-    range = vtkMRMLVectorVolumeNode::SafeDownCast(node)->GetImageData()->GetPointData()->GetScalars()->GetRange(-1);
-  }
-  else if (strcmp(node->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
-    strcmp(node->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
-    strcmp(node->GetClassName(), "vtkMRMLGridTransformNode") == 0)
-  {
-    d->InputReferenceComboBox->setEnabled(true);
-    vtkSmartPointer<vtkMRMLVolumeNode> referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->mrmlScene()->GetNodeByID(pNode->GetReferenceVolumeNodeID()));
+  // Update widget from MRML
+  d->ParameterComboBox->setCurrentNode(pNode);
+  d->InputFieldComboBox->setCurrentNodeID(pNode->GetInputNodeID());
+  d->InputReferenceComboBox->setCurrentNodeID(pNode->GetReferenceVolumeNodeID());
+  d->OutputModelComboBox->setCurrentNodeID(pNode->GetOutputModelNodeID());
 
-    if (referenceVolumeNode == NULL)
-    {
-      return;
-    }
+  // Update Visualization Parameters
+  // Glyph Parameters
+  d->InputGlyphPointMax->setValue(pNode->GetGlyphPointMax());
+  d->InputGlyphSeed->setValue(pNode->GetGlyphSeed());
+  d->InputGlyphScale->setValue(pNode->GetGlyphScale());
+  d->InputGlyphThreshold->setMaximumValue(pNode->GetGlyphThresholdMax());
+  d->InputGlyphThreshold->setMinimumValue(pNode->GetGlyphThresholdMin());
+  d->GlyphSourceComboBox->setCurrentIndex(pNode->GetGlyphSourceOption());
+  // Arrow Parameters
+  d->InputGlyphArrowScaleDirectional->setChecked(pNode->GetGlyphArrowScaleDirectional());
+  d->InputGlyphArrowScaleIsotropic->setChecked(pNode->GetGlyphArrowScaleIsotropic());
+  d->InputGlyphArrowTipLength->setValue(pNode->GetGlyphArrowTipLength());
+  d->InputGlyphArrowTipRadius->setValue(pNode->GetGlyphArrowTipRadius());
+  d->InputGlyphArrowShaftRadius->setValue(pNode->GetGlyphArrowShaftRadius());
+  d->InputGlyphArrowResolution->setValue(pNode->GetGlyphArrowResolution());
+  // Cone Parameters
+  d->InputGlyphConeScaleDirectional->setChecked(pNode->GetGlyphConeScaleDirectional());
+  d->InputGlyphConeScaleIsotropic->setChecked(pNode->GetGlyphConeScaleIsotropic());
+  d->InputGlyphConeHeight->setValue(pNode->GetGlyphConeHeight());
+  d->InputGlyphConeRadius->setValue(pNode->GetGlyphConeRadius());
+  d->InputGlyphConeResolution->setValue(pNode->GetGlyphConeResolution());
+  // Sphere Parameters
+  d->InputGlyphSphereResolution->setValue(pNode->GetGlyphSphereResolution());
 
-    //TODO: Remake progress dialog and add detail (update progress from actual steps occurring in logic)
-    QProgressDialog *convertProgress =  new QProgressDialog(qSlicerApplication::application()->mainWindow());
-    convertProgress->setCancelButton(0);
-    convertProgress->setModal(true);
-    convertProgress->setMinimumDuration(100);
-    convertProgress->show();
-    convertProgress->setLabelText("Converting transform to vector volume...");
-    
-    convertProgress->setValue(20);
-    d->logic()->GenerateDeformationField();
-    
-    convertProgress->setValue(80);
-    range = d->logic()->GetFieldRange();
-    
-    convertProgress->setValue(100);
-    delete convertProgress;
+  // Grid Parameters
+  d->InputGridScale->setValue(pNode->GetGridScale());
+  d->InputGridSpacing->setValue(pNode->GetGridSpacingMM());
+
+  // Block Parameters
+  d->InputBlockScale->setValue(pNode->GetBlockScale());
+  d->InputBlockDisplacementCheck->setChecked(pNode->GetBlockDisplacementCheck());
+
+  // Contour Parameters
+  //d->InputContourNumber->setValue(pNode->GetContourNumber());
+  //d->InputContourRange->setMaximumValue(pNode->GetContourMax());
+  //d->InputContourRange->setMinimumValue(pNode->GetContourMin());
+  d->InputContourDecimation->setValue(pNode->GetContourDecimation());
+
+  // Glyph Slice Parameters
+  // Set default to a slice node that exists in the scene
+  if (pNode->GetGlyphSliceNodeID())
+  {
+    d->GlyphSliceComboBox->setCurrentNodeID(pNode->GetGlyphSliceNodeID());
   }
   else
   {
-    return;
+    this->setGlyphSliceNode(d->GlyphSliceComboBox->currentNode());
+  }  
+  d->InputGlyphSlicePointMax->setValue(pNode->GetGlyphSlicePointMax());
+  d->InputGlyphSliceThreshold->setMaximumValue(pNode->GetGlyphSliceThresholdMax());
+  d->InputGlyphSliceThreshold->setMinimumValue(pNode->GetGlyphSliceThresholdMin());
+  d->InputGlyphSliceScale->setValue(pNode->GetGlyphSliceScale());
+  d->InputGlyphSliceSeed->setValue(pNode->GetGlyphSliceSeed());
+
+  // Grid Slice Parameters
+  if (pNode->GetGridSliceNodeID())
+  {
+    d->GridSliceComboBox->setCurrentNodeID(pNode->GetGridSliceNodeID());
   }
-
-  pNode->SetGlyphThresholdMin(range[0]);
-  d->InputGlyphThreshold->setMinimum(range[0]);
-  d->InputGlyphThreshold->setMinimumValue(range[0]);
-  pNode->SetGlyphThresholdMax(range[1]);
-  d->InputGlyphThreshold->setMaximum(range[1]);
-  d->InputGlyphThreshold->setMaximumValue(range[1]);
-
-  pNode->SetContourMin(range[0]);
-  d->InputContourRange->setMinimum(range[0]);
-  d->InputContourRange->setMinimumValue(range[0]);
-  pNode->SetContourMax(range[1]);
-  d->InputContourRange->setMaximum(range[1]);
-  d->InputContourRange->setMaximumValue(range[1]);
-
-  pNode->SetGlyphSliceThresholdMin(range[0]);
-  d->InputGlyphSliceThreshold->setMinimum(range[0]);
-  d->InputGlyphSliceThreshold->setMinimumValue(range[0]);
-  pNode->SetGlyphSliceThresholdMax(range[1]);
-  d->InputGlyphSliceThreshold->setMaximum(range[1]);
-  d->InputGlyphSliceThreshold->setMaximumValue(range[1]);
+  else
+  {
+    this->setGridSliceNode(d->GridSliceComboBox->currentNode());
+  }
+  d->InputGridSliceScale->setValue(pNode->GetGridSliceScale());
+  d->InputGridSliceSpacing->setValue(pNode->GetGridSliceSpacingMM());
+ 
+  this->updateLabels();
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::referenceVolumeChanged(vtkMRMLNode* node)
+void qSlicerTransformVisualizerModuleWidget::updateLabels()
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
 
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene() || !node)
+  if (d->InputFieldComboBox->currentNode() == NULL)
   {
-    return;
+    d->ApplyButton->setEnabled(false);
+    d->VolumeDisabledLabel->show();
   }
-
-  pNode->DisableModifiedEventOn();
-  pNode->SetAndObserveReferenceVolumeNodeID(node->GetID());
-  pNode->DisableModifiedEventOff();
-  
-  vtkSmartPointer<vtkMRMLTransformNode> inputVolumeNode = vtkMRMLTransformNode::SafeDownCast(this->mrmlScene()->GetNodeByID(pNode->GetInputVolumeNodeID()));
-  if (inputVolumeNode == NULL)
+  else
   {
-    return;
+    d->ApplyButton->setEnabled(true);
+    d->VolumeDisabledLabel->hide();
+    
+    if (strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLVectorVolumeNode") != 0 && d->InputReferenceComboBox->currentNode() == NULL)
+    {
+      d->ApplyButton->setEnabled(false);
+      d->ReferenceDisabledLabel->show();
+    }
+    else
+    {
+      d->ApplyButton->setEnabled(true);
+      d->ReferenceDisabledLabel->hide();
+    }
   }
   
-  //TODO: Remake progress dialog and add detail (update progress from actual steps occurring in logic)
-    QProgressDialog *convertProgress =  new QProgressDialog(qSlicerApplication::application()->mainWindow());
-    convertProgress->setCancelButton(0);
-    convertProgress->setModal(true);
-    convertProgress->setMinimumDuration(100);
-    convertProgress->show();
-  convertProgress->setLabelText("Converting transform to vector volume...");
-  
-  convertProgress->setValue(20);
-  d->logic()->GenerateDeformationField();
-  
-  convertProgress->setValue(80);
-  double* range = d->logic()->GetFieldRange();
-  
-  convertProgress->setValue(100);
-  delete convertProgress;
-
-  pNode->SetGlyphThresholdMin(range[0]);
-  d->InputGlyphThreshold->setMinimum(range[0]);
-  d->InputGlyphThreshold->setMinimumValue(range[0]);
-  pNode->SetGlyphThresholdMax(range[1]);
-  d->InputGlyphThreshold->setMaximum(range[1]);
-  d->InputGlyphThreshold->setMaximumValue(range[1]);
-
-  pNode->SetContourMin(range[0]);
-  d->InputContourRange->setMinimum(range[0]);
-  d->InputContourRange->setMinimumValue(range[0]);
-  pNode->SetContourMax(range[1]);
-  d->InputContourRange->setMaximum(range[1]);
-  d->InputContourRange->setMaximumValue(range[1]);
-
-  pNode->SetGlyphSliceThresholdMin(range[0]);
-  d->InputGlyphSliceThreshold->setMinimum(range[0]);
-  d->InputGlyphSliceThreshold->setMinimumValue(range[0]);
-  pNode->SetGlyphSliceThresholdMax(range[1]);
-  d->InputGlyphSliceThreshold->setMaximum(range[1]);
-  d->InputGlyphSliceThreshold->setMaximumValue(range[1]);
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::outputModelChanged(vtkMRMLNode* node)
-{
-  Q_D(qSlicerTransformVisualizerModuleWidget);
-
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene() || !node)
+  if (d->OutputModelComboBox->currentNode() == NULL)
   {
     d->ApplyButton->setEnabled(false);
     d->ModelDisabledLabel->show();
-    return;
   }
-
-  d->ApplyButton->setEnabled(true);
-  d->ModelDisabledLabel->hide();
-
-  pNode->DisableModifiedEventOn();
-  pNode->SetAndObserveOutputModelNodeID(node->GetID());
-  pNode->DisableModifiedEventOff();
+  else
+  {
+    d->ApplyButton->setEnabled(true);
+    d->ModelDisabledLabel->hide();
+  }
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::updateSourceOptions(int option)
+void qSlicerTransformVisualizerModuleWidget::updateGlyphSourceOptions(int sourceOption)
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-
-  if (option == d->logic()->ARROW_3D)
+  
+  if (sourceOption == d->logic()->ARROW_3D)
   {
     d->ArrowSourceOptions->setEnabled(true);
     d->ArrowSourceOptions->setVisible(true);
@@ -454,17 +290,8 @@ void qSlicerTransformVisualizerModuleWidget::updateSourceOptions(int option)
     d->ConeSourceOptions->setVisible(false);
     d->SphereSourceOptions->setEnabled(false);
     d->SphereSourceOptions->setVisible(false);
-
-    if (!pNode || !this->mrmlScene())
-  {
-    return;
   }
-    pNode->DisableModifiedEventOn();
-    pNode->SetGlyphScaleDirectional(true);
-    pNode->SetGlyphScaleIsotropic(false);
-    pNode->DisableModifiedEventOff();
-  }
-  else if (option == d->logic()->CONE_3D)
+  else if (sourceOption == d->logic()->CONE_3D)
   {
     d->ArrowSourceOptions->setEnabled(false);
     d->ArrowSourceOptions->setVisible(false);
@@ -472,17 +299,8 @@ void qSlicerTransformVisualizerModuleWidget::updateSourceOptions(int option)
     d->ConeSourceOptions->setVisible(true);
     d->SphereSourceOptions->setEnabled(false);
     d->SphereSourceOptions->setVisible(false);  
-
-    if (!pNode || !this->mrmlScene())
-  {
-    return;
   }
-    pNode->DisableModifiedEventOn();
-    pNode->SetGlyphScaleDirectional(true);
-    pNode->SetGlyphScaleIsotropic(false);
-    pNode->DisableModifiedEventOff();
-  }
-  else if (option == d->logic()->SPHERE_3D)
+  else if (sourceOption == d->logic()->SPHERE_3D)
   {
     d->ArrowSourceOptions->setEnabled(false);
     d->ArrowSourceOptions->setVisible(false);
@@ -490,19 +308,13 @@ void qSlicerTransformVisualizerModuleWidget::updateSourceOptions(int option)
     d->ConeSourceOptions->setVisible(false);
     d->SphereSourceOptions->setEnabled(true);
     d->SphereSourceOptions->setVisible(true);
-
-    if (!pNode || !this->mrmlScene())
-  {
-    return;
   }
-    pNode->DisableModifiedEventOn();
-    pNode->SetGlyphScaleDirectional(false);
-    pNode->SetGlyphScaleIsotropic(true);
-    pNode->DisableModifiedEventOff();
-  }
+}
 
-  d->InputGlyphScaleDirectional->setChecked(pNode->GetGlyphScaleDirectional());
-  d->InputGlyphScaleIsotropic->setChecked(pNode->GetGlyphScaleIsotropic());
+//-----------------------------------------------------------------------------
+void qSlicerTransformVisualizerModuleWidget::onLogicModified()
+{
+  this->update();
 }
 
 //-----------------------------------------------------------------------------
@@ -520,6 +332,20 @@ void qSlicerTransformVisualizerModuleWidget::visualize()
     visualizeProgress->show();
   visualizeProgress->setLabelText("Processing...");
     visualizeProgress->setValue(0);
+  
+  if (strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
+    strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
+    strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLGridTransformNode") == 0)
+  { 
+    visualizeProgress->setLabelText("Generating deformation field...");
+    visualizeProgress->setValue(10);
+    d->logic()->GenerateDeformationField();
+  }
+  else if (strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLVectorVolumeNode") != 0)
+  {
+    std::cerr << "Error: Unsupported input type" << std::endl;
+    return;
+  }
   
   if (d->GlyphToggle->isChecked())
   {
@@ -566,25 +392,27 @@ void qSlicerTransformVisualizerModuleWidget::setup()
 
   connect(d->ParameterComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(setTransformVisualizerParametersNode(vtkMRMLNode*)));
 
-  connect(d->InputFieldComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(inputVolumeChanged(vtkMRMLNode*)));
+  connect(d->InputFieldComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(inputChanged(vtkMRMLNode*)));
   connect(d->InputReferenceComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(referenceVolumeChanged(vtkMRMLNode*)));
   connect(d->OutputModelComboBox, SIGNAL(currentNodeChanged(vtkMRMLNode*)), this, SLOT(outputModelChanged(vtkMRMLNode*)));
 
   // Glyph Parameters
   connect(d->InputGlyphPointMax, SIGNAL(valueChanged(double)), this, SLOT(setGlyphPointMax(double)));
   connect(d->InputGlyphScale, SIGNAL(valueChanged(double)), this, SLOT(setGlyphScale(double)));
-  connect(d->InputGlyphScaleDirectional, SIGNAL(toggled(bool)), this, SLOT(setGlyphScaleDirectional(bool)));
-  connect(d->InputGlyphScaleIsotropic, SIGNAL(toggled(bool)), this, SLOT(setGlyphScaleIsotropic(bool)));
   connect(d->InputGlyphThreshold, SIGNAL(valuesChanged(double, double)), this, SLOT(setGlyphThreshold(double, double)));
   connect(d->GenerateSeedButton, SIGNAL(clicked()), this, SLOT(setSeed()));
   connect(d->InputGlyphSeed, SIGNAL(valueChanged(int)), this, SLOT(setGlyphSeed(int)));  
   connect(d->GlyphSourceComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(setGlyphSourceOption(int)));
   // Arrow Parameters
+  connect(d->InputGlyphArrowScaleDirectional, SIGNAL(toggled(bool)), this, SLOT(setGlyphArrowScaleDirectional(bool)));
+  connect(d->InputGlyphArrowScaleIsotropic, SIGNAL(toggled(bool)), this, SLOT(setGlyphArrowScaleIsotropic(bool)));  
   connect(d->InputGlyphArrowTipLength, SIGNAL(valueChanged(double)), this, SLOT(setGlyphArrowTipLength(double)));
   connect(d->InputGlyphArrowTipRadius, SIGNAL(valueChanged(double)), this, SLOT(setGlyphArrowTipRadius(double)));
   connect(d->InputGlyphArrowShaftRadius, SIGNAL(valueChanged(double)), this, SLOT(setGlyphArrowShaftRadius(double)));  
   connect(d->InputGlyphArrowResolution, SIGNAL(valueChanged(double)), this, SLOT(setGlyphArrowResolution(double)));
   // Cone Parameters
+  connect(d->InputGlyphConeScaleDirectional, SIGNAL(toggled(bool)), this, SLOT(setGlyphConeScaleDirectional(bool)));
+  connect(d->InputGlyphConeScaleIsotropic, SIGNAL(toggled(bool)), this, SLOT(setGlyphConeScaleIsotropic(bool)));  
   connect(d->InputGlyphConeHeight, SIGNAL(valueChanged(double)), this, SLOT(setGlyphConeHeight(double)));
   connect(d->InputGlyphConeRadius, SIGNAL(valueChanged(double)), this, SLOT(setGlyphConeRadius(double)));
   connect(d->InputGlyphConeResolution, SIGNAL(valueChanged(double)), this, SLOT(setGlyphConeResolution(double)));
@@ -600,8 +428,8 @@ void qSlicerTransformVisualizerModuleWidget::setup()
   connect(d->InputBlockDisplacementCheck, SIGNAL(stateChanged(int)), this, SLOT(setBlockDisplacementCheck(int)));
 
   // Contour Parameters
-  connect(d->InputContourNumber, SIGNAL(valueChanged(double)), this, SLOT(setContourNumber(double)));
-  connect(d->InputContourRange, SIGNAL(valuesChanged(double, double)), this, SLOT(setContourRange(double, double)));
+  //connect(d->InputContourNumber, SIGNAL(valueChanged(double)), this, SLOT(setContourNumber(double)));
+  //connect(d->InputContourRange, SIGNAL(valuesChanged(double, double)), this, SLOT(setContourRange(double, double)));
   connect(d->InputContourDecimation, SIGNAL(valueChanged(double)), this, SLOT(setContourDecimation(double)));
 
   // Glyph Slice Parameters
@@ -620,8 +448,69 @@ void qSlicerTransformVisualizerModuleWidget::setup()
   connect(d->ApplyButton, SIGNAL(clicked()), this, SLOT(visualize()));
 }
 
+
 //-----------------------------------------------------------------------------
-// Glyph parameters
+// Set parameters
+//-----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
+void qSlicerTransformVisualizerModuleWidget::inputChanged(vtkMRMLNode* node)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene() || !node)
+  {
+    std::cerr << "Error: Unable to set input attribute" << std::endl;
+    return;
+  }
+  
+  if (strcmp(node->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
+    strcmp(node->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
+    strcmp(node->GetClassName(), "vtkMRMLGridTransformNode") == 0)
+  { 
+    d->InputReferenceComboBox->setEnabled(true);
+  }
+  else if (strcmp(node->GetClassName(), "vtkMRMLVectorVolumeNode") == 0)
+  {
+    d->InputReferenceComboBox->setEnabled(false);
+  }
+  else
+  {
+    std::cerr << "Error: Unsupported input type" << std::endl;
+    return;  
+  }
+  
+  pNode->SetAndObserveInputNodeID(node->GetID());
+  this->updateLabels();
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerTransformVisualizerModuleWidget::referenceVolumeChanged(vtkMRMLNode* node)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene() || !node)
+  {
+    std::cerr << "Error: Unable to set reference volume attribute" << std::endl;
+    return;
+  }
+  pNode->SetAndObserveReferenceVolumeNodeID(node->GetID());
+  this->updateLabels();
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerTransformVisualizerModuleWidget::outputModelChanged(vtkMRMLNode* node)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene() || !node)
+  {
+    std::cerr << "Error: Unable to set output model attribute" << std::endl;
+    return;
+  }
+  pNode->SetAndObserveOutputModelNodeID(node->GetID());
+  this->updateLabels();
+}
+
 //-----------------------------------------------------------------------------
 void qSlicerTransformVisualizerModuleWidget::setGlyphPointMax(double pointMax)
 {
@@ -629,11 +518,10 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphPointMax(double pointMax)
   vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
   if (!pNode || !this->mrmlScene())
   {
-    return;
+    std::cerr << "Error: Unable to set attribute" << std::endl;
+    return; 
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphPointMax(pointMax);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -645,10 +533,8 @@ void qSlicerTransformVisualizerModuleWidget::setSeed()
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSeed(rand());
   d->InputGlyphSeed->setValue(pNode->GetGlyphSeed());
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -660,9 +546,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSeed(int seed)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSeed(seed);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -674,37 +558,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphScale(double scale)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphScale(scale);
-  pNode->DisableModifiedEventOff();
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::setGlyphScaleDirectional(bool state)
-{
-  Q_D(qSlicerTransformVisualizerModuleWidget);
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene())
-  {
-    return;
-  }
-  pNode->DisableModifiedEventOn();
-  pNode->SetGlyphScaleDirectional(state);
-  pNode->DisableModifiedEventOff();
-}
-
-//-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::setGlyphScaleIsotropic(bool state)
-{
-  Q_D(qSlicerTransformVisualizerModuleWidget);
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene())
-  {
-    return;
-  }
-  pNode->DisableModifiedEventOn();
-  pNode->SetGlyphScaleIsotropic(state);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -716,10 +570,8 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphThreshold(double min, doubl
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphThresholdMin(min);
   pNode->SetGlyphThresholdMax(max);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -731,14 +583,34 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSourceOption(int option)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSourceOption(option);
-  pNode->DisableModifiedEventOff();
-  this->updateSourceOptions(option);
+  this->updateGlyphSourceOptions(option);
 }
 
 //-----------------------------------------------------------------------------
-// Arrow parameters
+void qSlicerTransformVisualizerModuleWidget::setGlyphArrowScaleDirectional(bool state)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene())
+  {
+    return;
+  }
+  pNode->SetGlyphArrowScaleDirectional(state);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerTransformVisualizerModuleWidget::setGlyphArrowScaleIsotropic(bool state)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene())
+  {
+    return;
+  }
+  pNode->SetGlyphArrowScaleIsotropic(state);
+}
+
 //-----------------------------------------------------------------------------
 void qSlicerTransformVisualizerModuleWidget::setGlyphArrowTipLength(double length)
 {
@@ -748,9 +620,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphArrowTipLength(double lengt
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphArrowTipLength(length);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -762,9 +632,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphArrowTipRadius(double radiu
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphArrowTipRadius(radius);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -776,9 +644,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphArrowShaftRadius(double rad
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphArrowShaftRadius(radius);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -790,13 +656,33 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphArrowResolution(double reso
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphArrowResolution(resolution);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
-// Cone Parameters
+void qSlicerTransformVisualizerModuleWidget::setGlyphConeScaleDirectional(bool state)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene())
+  {
+    return;
+  }
+  pNode->SetGlyphConeScaleDirectional(state);
+}
+
+//-----------------------------------------------------------------------------
+void qSlicerTransformVisualizerModuleWidget::setGlyphConeScaleIsotropic(bool state)
+{
+  Q_D(qSlicerTransformVisualizerModuleWidget);
+  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
+  if (!pNode || !this->mrmlScene())
+  {
+    return;
+  }
+  pNode->SetGlyphConeScaleIsotropic(state);
+}
+
 //-----------------------------------------------------------------------------
 void qSlicerTransformVisualizerModuleWidget::setGlyphConeHeight(double height)
 {
@@ -806,9 +692,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphConeHeight(double height)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphConeHeight(height);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -820,9 +704,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphConeRadius(double radius)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphConeRadius(radius);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -834,9 +716,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphConeResolution(double resol
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphConeResolution(resolution);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -850,9 +730,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSphereResolution(double res
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSphereResolution(resolution);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -864,9 +742,7 @@ void qSlicerTransformVisualizerModuleWidget::setGridScale(double scale)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGridScale(scale);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -878,9 +754,7 @@ void qSlicerTransformVisualizerModuleWidget::setGridSpacingMM(double spacing)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGridSpacingMM(spacing);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -892,9 +766,7 @@ void qSlicerTransformVisualizerModuleWidget::setBlockScale(double scale)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetBlockScale(scale);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -906,9 +778,7 @@ void qSlicerTransformVisualizerModuleWidget::setBlockDisplacementCheck(int state
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetBlockDisplacementCheck(state);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -920,9 +790,7 @@ void qSlicerTransformVisualizerModuleWidget::setContourNumber(double number)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetContourNumber(number);
-  pNode->DisableModifiedEventOff();
 }
 //-----------------------------------------------------------------------------
 void qSlicerTransformVisualizerModuleWidget::setContourRange(double min, double max)
@@ -933,10 +801,8 @@ void qSlicerTransformVisualizerModuleWidget::setContourRange(double min, double 
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
-  pNode->SetContourMin(min);
-  pNode->SetContourMax(max);
-  pNode->DisableModifiedEventOff();
+  //pNode->SetContourMin(min);
+  //pNode->SetContourMax(max);
 }
 
 //-----------------------------------------------------------------------------
@@ -948,9 +814,7 @@ void qSlicerTransformVisualizerModuleWidget::setContourDecimation(double reducti
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetContourDecimation(reduction);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -963,9 +827,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSliceNode(vtkMRMLNode* node
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetAndObserveGlyphSliceNodeID(node->GetID());
-  pNode->DisableModifiedEventOff();  
 }
 
 //-----------------------------------------------------------------------------
@@ -977,9 +839,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSlicePointMax(double pointM
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSlicePointMax(pointMax);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -991,10 +851,8 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSliceThreshold(double min, 
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSliceThresholdMin(min);
   pNode->SetGlyphSliceThresholdMax(max);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -1006,9 +864,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSliceScale(double scale)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSliceScale(scale);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -1020,9 +876,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSliceSeed(int seed)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSliceSeed(seed);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -1034,10 +888,8 @@ void qSlicerTransformVisualizerModuleWidget::setSeed2()
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGlyphSliceSeed(rand());
   d->InputGlyphSliceSeed->setValue(pNode->GetGlyphSliceSeed());
-  pNode->DisableModifiedEventOff();
 }
 
 
@@ -1051,9 +903,7 @@ void qSlicerTransformVisualizerModuleWidget::setGridSliceNode(vtkMRMLNode* node)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetAndObserveGridSliceNodeID(node->GetID());
-  pNode->DisableModifiedEventOff();  
 }
 
 //-----------------------------------------------------------------------------
@@ -1065,9 +915,7 @@ void qSlicerTransformVisualizerModuleWidget::setGridSliceScale(double scale)
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGridSliceScale(scale);
-  pNode->DisableModifiedEventOff();
 }
 
 //-----------------------------------------------------------------------------
@@ -1079,7 +927,5 @@ void qSlicerTransformVisualizerModuleWidget::setGridSliceSpacingMM(double spacin
   {
     return;
   }
-  pNode->DisableModifiedEventOn();
   pNode->SetGridSliceSpacingMM(spacing);
-  pNode->DisableModifiedEventOff();
 }

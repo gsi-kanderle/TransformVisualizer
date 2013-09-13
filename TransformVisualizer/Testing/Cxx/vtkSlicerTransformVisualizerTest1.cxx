@@ -347,7 +347,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     mrmlScene->AddNode(transformStorageNode);
 	mrmlScene->Commit();
 	gridTransformNode->SetAndObserveStorageNodeID(transformStorageNode->GetID());  
-	paramNode->SetAndObserveInputVolumeNodeID(gridTransformNode->GetID());
+	paramNode->SetAndObserveInputNodeID(gridTransformNode->GetID());
   }
   else if (transformStorageNode->ReadData(bsplineTransformNode))
   {
@@ -355,7 +355,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     mrmlScene->AddNode(transformStorageNode);
 	mrmlScene->Commit();
 	bsplineTransformNode->SetAndObserveStorageNodeID(transformStorageNode->GetID());
-	paramNode->SetAndObserveInputVolumeNodeID(bsplineTransformNode->GetID());
+	paramNode->SetAndObserveInputNodeID(bsplineTransformNode->GetID());
   }  
   else if (transformStorageNode->ReadData(linearTransformNode))
   {
@@ -363,7 +363,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     mrmlScene->AddNode(transformStorageNode);
 	mrmlScene->Commit();
 	linearTransformNode->SetAndObserveStorageNodeID(transformStorageNode->GetID());
-    paramNode->SetAndObserveInputVolumeNodeID(linearTransformNode->GetID());	
+    paramNode->SetAndObserveInputNodeID(linearTransformNode->GetID());	
   }
   else
   {
@@ -413,15 +413,8 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   TransformVisualizerLogic->GenerateDeformationField();
   
   //Emulate parameter adjustments that are done in qSlicerTransformVisualizerModuleWidget whenever an input volume is selected
-  double* range = TransformVisualizerLogic->GetFieldRange();
-  range[0] = floor(range[0]*10000)/10000; //truncate to 4 decimal digits due to decimal precision setting in the UI
-  range[1] = ceil(range[1]*10000)/10000;
-  paramNode->SetGlyphThresholdMin(range[0]);
-  paramNode->SetGlyphThresholdMax(range[1]);
-  paramNode->SetContourMin(range[0]);
-  paramNode->SetContourMax(range[1]);
-  paramNode->SetGlyphSliceThresholdMin(range[0]);
-  paramNode->SetGlyphSliceThresholdMax(range[1]);
+  //paramNode->SetContourMin(range[0]);
+  //paramNode->SetContourMax(range[1]);
 
   //Initialize
   vtkSmartPointer<vtkPolyDataReader> reader = vtkSmartPointer<vtkPolyDataReader>::New();
@@ -579,6 +572,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   
   //----------------------------------------------------------------------------
   // Test Contour mode
+  /*
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_CONTOUR_3D);
   
   modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
@@ -619,6 +613,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     std::cerr << "Surface area difference exceeds threshold!" << std::endl;
     return EXIT_FAILURE;
   }
+  */
   
   //----------------------------------------------------------------------------
   // Test Glyph Slice mode

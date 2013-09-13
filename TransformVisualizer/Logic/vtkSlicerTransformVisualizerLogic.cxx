@@ -196,8 +196,8 @@ void vtkSlicerTransformVisualizerLogic::OnMRMLSceneEndClose()
 //----------------------------------------------------------------------------
 void vtkSlicerTransformVisualizerLogic::GenerateDeformationField()
 {
-  vtkSmartPointer<vtkMRMLTransformNode> inputVolumeNode = vtkMRMLTransformNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()));
-  if (inputVolumeNode == NULL)
+  vtkSmartPointer<vtkMRMLTransformNode> inputNode = vtkMRMLTransformNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
+  if (inputNode == NULL)
   {
     vtkErrorMacro("Failed to convert input: input node is invalid");
     return;
@@ -227,7 +227,7 @@ void vtkSlicerTransformVisualizerLogic::GenerateDeformationField()
   float fixedPoint[3];
   float movingPoint[3];
   
-  vtkSmartPointer<vtkGeneralTransform> inputTransform = inputVolumeNode->GetTransformToParent();
+  vtkSmartPointer<vtkGeneralTransform> inputTransform = inputNode->GetTransformToParent();
   float *ptr = (float *)this->deformationField->GetScalarPointer();
   for(int k = 0; k < extent[5]+1; k++)
   {
@@ -267,7 +267,7 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
     vtkErrorMacro("CreateVisualization failed: Deformation Field Visualizer Node or scene is invalid");
     return;
   }
-  
+ 
   vtkSmartPointer<vtkMRMLModelNode> outputModelNode = vtkMRMLModelNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetOutputModelNodeID()));
   outputModelNode->SetScene(this->GetMRMLScene());
 
@@ -282,28 +282,28 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
   vtkSmartPointer<vtkMatrix4x4> ijkToRasDirections = vtkSmartPointer<vtkMatrix4x4>::New();
 
   //Initialize input
-  if (strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()))->GetClassName(), "vtkMRMLVectorVolumeNode") == 0)
+  if (strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLVectorVolumeNode") == 0)
   {
   
-    vtkSmartPointer<vtkMRMLVectorVolumeNode> inputVolumeNode = vtkMRMLVectorVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()));
-    if (inputVolumeNode == NULL)
+    vtkSmartPointer<vtkMRMLVectorVolumeNode> inputNode = vtkMRMLVectorVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
+    if (inputNode == NULL)
     {
       vtkErrorMacro("CreateVisualization failed: Input node is invalid");
       return;
     }
     
-    this->deformationField->DeepCopy(inputVolumeNode->GetImageData());
+    this->deformationField->DeepCopy(inputNode->GetImageData());
     this->deformationField->GetPointData()->SetActiveVectors("ImageScalars");
     
-    origin = inputVolumeNode->GetOrigin();
-    inputVolumeNode->GetIJKToRASDirectionMatrix(ijkToRasDirections);
+    origin = inputNode->GetOrigin();
+    inputNode->GetIJKToRASDirectionMatrix(ijkToRasDirections);
     
-    inputVolumeNode->GetSpacing(spacing);
+    inputNode->GetSpacing(spacing);
     this->deformationField->SetSpacing(spacing);
   }
-  else if (strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()))->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
-  strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()))->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
-  strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()))->GetClassName(), "vtkMRMLGridTransformNode") == 0)
+  else if (strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
+  strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
+  strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLGridTransformNode") == 0)
   {
     vtkSmartPointer<vtkMRMLVolumeNode> referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
     if (referenceVolumeNode == NULL)
@@ -319,7 +319,7 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
   {
     std::stringstream errorMessage;
     errorMessage << "Invalid input node selected. Expected vtkMRMLVectorVolumeNode, vtkMRMLLinearTransformNode, vtkMRMLBSplineTransformNode, or vtkMRMLGridTransformNode, but got";
-    errorMessage << (this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputVolumeNodeID()))->GetClassName() << "instead" << std::endl;
+    errorMessage << (this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName() << "instead" << std::endl;
     return;
   }
   
@@ -397,6 +397,7 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
     case VIS_MODE_GLYPH_2D:
       if (vtkMRMLSliceNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetGlyphSliceNodeID())) == NULL)
       {
+        this->GetMRMLScene()->EndState(vtkMRMLScene::BatchProcessState);
         vtkErrorMacro("Failed to create Glyph Slice visualization: Invalid slice node");
         return;
       }
@@ -409,6 +410,7 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
     case VIS_MODE_GRID_2D:
       if (vtkMRMLSliceNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetGridSliceNodeID())) == NULL)
       {
+        this->GetMRMLScene()->EndState(vtkMRMLScene::BatchProcessState);
         vtkErrorMacro("Failed to create Grid Slice visualization: Invalid slice node");
         return;
       }
@@ -468,13 +470,13 @@ void vtkSlicerTransformVisualizerLogic::GlyphVisualization(vtkImageData* field, 
   glyphFilter->SetMagnitudeMax(this->TransformVisualizerNode->GetGlyphThresholdMax());
   glyphFilter->SetMagnitudeMin(this->TransformVisualizerNode->GetGlyphThresholdMin());
   glyphFilter->SetScaleFactor(this->TransformVisualizerNode->GetGlyphScale());
-  glyphFilter->SetScaleDirectional(this->TransformVisualizerNode->GetGlyphScaleDirectional());
   glyphFilter->SetColorModeToColorByVector();
 
   switch (sourceOption){
     //Arrows
     case ARROW_3D:
     {
+      glyphFilter->SetScaleDirectional(this->TransformVisualizerNode->GetGlyphArrowScaleDirectional());
       vtkSmartPointer<vtkArrowSource> arrowSource = vtkSmartPointer<vtkArrowSource>::New();
       arrowSource->SetTipLength(this->TransformVisualizerNode->GetGlyphArrowTipLength());
       arrowSource->SetTipRadius(this->TransformVisualizerNode->GetGlyphArrowTipRadius());
@@ -489,6 +491,7 @@ void vtkSlicerTransformVisualizerLogic::GlyphVisualization(vtkImageData* field, 
     //Cones
     case CONE_3D:
     {
+      glyphFilter->SetScaleDirectional(this->TransformVisualizerNode->GetGlyphConeScaleDirectional());
       vtkSmartPointer<vtkConeSource> coneSource = vtkSmartPointer<vtkConeSource>::New();
       coneSource->SetHeight(this->TransformVisualizerNode->GetGlyphConeHeight());
       coneSource->SetRadius(this->TransformVisualizerNode->GetGlyphConeRadius());
@@ -501,6 +504,7 @@ void vtkSlicerTransformVisualizerLogic::GlyphVisualization(vtkImageData* field, 
     //Spheres
     case SPHERE_3D:
     {
+      glyphFilter->SetScaleDirectional(false);
       vtkSmartPointer<vtkSphereSource> sphereSource = vtkSmartPointer<vtkSphereSource>::New();
       sphereSource->SetRadius(1);
       sphereSource->SetThetaResolution(this->TransformVisualizerNode->GetGlyphSphereResolution());
@@ -675,7 +679,12 @@ void vtkSlicerTransformVisualizerLogic::ContourVisualization(vtkImageData* field
   iso->ComputeScalarsOn();
   iso->ComputeNormalsOff();
   iso->ComputeGradientsOff();
-  iso->GenerateValues(this->TransformVisualizerNode->GetContourNumber(), this->TransformVisualizerNode->GetContourMin(), this->TransformVisualizerNode->GetContourMax());
+  double* values = this->TransformVisualizerNode->GetContourValues();
+  iso->SetNumberOfContours(this->TransformVisualizerNode->GetContourNumber());
+  for(int i = 0; i < this->TransformVisualizerNode->GetContourNumber(); i++)
+  {
+    iso->SetValue(i, values[i]);
+  }
   iso->Update();
   
   vtkSmartPointer<vtkDecimatePro> decimator = vtkSmartPointer<vtkDecimatePro>::New();

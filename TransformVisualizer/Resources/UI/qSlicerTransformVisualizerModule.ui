@@ -13,7 +13,7 @@
     <x>0</x>
     <y>0</y>
     <width>337</width>
-    <height>763</height>
+    <height>899</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -134,12 +134,12 @@
           <number>4</number>
          </property>
          <item row="0" column="0">
-          <widget class="QLabel" name="InputVolumeLabel">
+          <widget class="QLabel" name="InputLabel">
            <property name="toolTip">
             <string>Input deformation as either a vector volume or a transform</string>
            </property>
            <property name="text">
-            <string>Deformation</string>
+            <string>Transform</string>
            </property>
           </widget>
          </item>
@@ -159,8 +159,8 @@
            </property>
            <property name="nodeTypes">
             <stringlist>
-             <string>vtkMRMLVectorVolumeNode</string>
              <string>vtkMRMLTransformNode</string>
+             <string>vtkMRMLVectorVolumeNode</string>
             </stringlist>
            </property>
            <property name="baseName">
@@ -184,7 +184,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="InputVolumeLabel_2">
+          <widget class="QLabel" name="ReferenceLabel_2">
            <property name="toolTip">
             <string>Reference image for visualizing transform nodes (will only use size, orientation and position)</string>
            </property>
@@ -300,6 +300,75 @@
        </widget>
       </item>
      </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="VolumeDisabledLabel">
+     <property name="text">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; color:#ff0000;&quot;&gt;No input transform or vector volume selected&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="ReferenceDisabledLabel">
+     <property name="text">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; color:#ff0000;&quot;&gt;No reference volume selected&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="ModelDisabledLabel">
+     <property name="text">
+      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
+&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
+p, li { white-space: pre-wrap; }
+&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
+&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; color:#ff0000;&quot;&gt;No output model selected&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QPushButton" name="ApplyButton">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>60</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
     </widget>
    </item>
    <item>
@@ -756,7 +825,7 @@
       <item row="4" column="0">
        <widget class="ctkCollapsibleGroupBox" name="ContourBox">
         <property name="enabled">
-         <bool>false</bool>
+         <bool>true</bool>
         </property>
         <property name="sizePolicy">
          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -785,77 +854,24 @@
         <property name="collapsed">
          <bool>false</bool>
         </property>
-        <layout class="QFormLayout" name="formLayout_8">
-         <property name="fieldGrowthPolicy">
-          <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-         </property>
-         <item row="0" column="0">
-          <widget class="QLabel" name="ContourNumberLabel">
-           <property name="toolTip">
-            <string>Number of contours to generate between the selected range values</string>
-           </property>
-           <property name="text">
-            <string>Number of Contours</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QDoubleSpinBox" name="InputContourNumber">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Number of contours to generate between the selected range values</string>
-           </property>
-           <property name="decimals">
-            <number>0</number>
-           </property>
-           <property name="minimum">
-            <double>1.000000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>500.000000000000000</double>
-           </property>
-           <property name="value">
-            <double>10.000000000000000</double>
-           </property>
-          </widget>
-         </item>
+        <layout class="QGridLayout" name="gridLayout_5">
          <item row="1" column="0">
-          <widget class="QLabel" name="ContourMinLabel">
-           <property name="toolTip">
-            <string>Range to create contours</string>
-           </property>
+          <widget class="QLabel" name="ContourValuesLabel">
            <property name="text">
-            <string>Range</string>
+            <string>Values</string>
            </property>
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="ctkRangeWidget" name="InputContourRange">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
+          <widget class="QLineEdit" name="InputContourValues"/>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="ContourDecimationLabel">
            <property name="toolTip">
-            <string>Range to create contours</string>
+            <string>Target decimation as a decimal percentage reduction in polygons (0 results in no decimation, 0.99 results in 99% reduction in polygons)</string>
            </property>
-           <property name="decimals">
-            <number>4</number>
-           </property>
-           <property name="singleStep">
-            <double>0.010000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>0.000000000000000</double>
-           </property>
-           <property name="maximumValue">
-            <double>0.000000000000000</double>
+           <property name="text">
+            <string>Decimate</string>
            </property>
           </widget>
          </item>
@@ -887,14 +903,33 @@
            </property>
           </widget>
          </item>
-         <item row="2" column="0">
-          <widget class="QLabel" name="ContourDecimationLabel">
-           <property name="toolTip">
-            <string>Target decimation as a decimal percentage reduction in polygons (0 results in no decimation, 0.99 results in 99% reduction in polygons)</string>
+         <item row="0" column="0" colspan="2">
+          <widget class="QFrame" name="frame">
+           <property name="minimumSize">
+            <size>
+             <width>0</width>
+             <height>40</height>
+            </size>
            </property>
-           <property name="text">
-            <string>Decimate</string>
+           <property name="frameShape">
+            <enum>QFrame::StyledPanel</enum>
            </property>
+           <property name="frameShadow">
+            <enum>QFrame::Raised</enum>
+           </property>
+           <widget class="QPushButton" name="ContourScalarColorButton">
+            <property name="geometry">
+             <rect>
+              <x>0</x>
+              <y>2</y>
+              <width>301</width>
+              <height>31</height>
+             </rect>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+           </widget>
           </widget>
          </item>
         </layout>
@@ -1045,7 +1080,7 @@
             <string>Number of glyphs to generate</string>
            </property>
            <property name="text">
-            <string>Number of Glyphs</string>
+            <string>Glyphs</string>
            </property>
           </widget>
          </item>
@@ -1061,7 +1096,7 @@
             <string>Number of glyphs to generate</string>
            </property>
            <property name="decimals">
-            <number>0</number>
+            <number>2</number>
            </property>
            <property name="singleStep">
             <double>1.000000000000000</double>
@@ -1077,7 +1112,7 @@
            </property>
           </widget>
          </item>
-         <item row="8" column="1" colspan="3">
+         <item row="9" column="1" colspan="3">
           <widget class="ctkCollapsibleGroupBox" name="ArrowSourceOptions">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -1108,6 +1143,22 @@
              <number>4</number>
             </property>
             <item row="0" column="0">
+             <widget class="QRadioButton" name="InputGlyphArrowScaleIsotropic">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Scale glyph in all directions</string>
+              </property>
+              <property name="text">
+               <string>Isotropic Scaling</string>
+              </property>
+             </widget>
+            </item>
+            <item row="2" column="0">
              <widget class="QLabel" name="TipLengthLabel">
               <property name="toolTip">
                <string>Adjust how much of the tip the arrow will consist of as a decimal percentage</string>
@@ -1117,7 +1168,7 @@
               </property>
              </widget>
             </item>
-            <item row="0" column="1">
+            <item row="2" column="1">
              <widget class="ctkSliderWidget" name="InputGlyphArrowTipLength">
               <property name="toolTip">
                <string>Adjust how much of the tip the arrow will consist of as a decimal percentage</string>
@@ -1139,7 +1190,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="0">
+            <item row="3" column="0">
              <widget class="QLabel" name="TipRadiusLabel">
               <property name="toolTip">
                <string>Adjust radius of base of arrow tip</string>
@@ -1149,7 +1200,7 @@
               </property>
              </widget>
             </item>
-            <item row="1" column="1">
+            <item row="3" column="1">
              <widget class="ctkSliderWidget" name="InputGlyphArrowTipRadius">
               <property name="toolTip">
                <string>Adjust radius of base of arrow tip</string>
@@ -1168,7 +1219,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
+            <item row="4" column="0">
              <widget class="QLabel" name="ShaftRadiusLabel">
               <property name="toolTip">
                <string>Adjust radius of arrow shaft</string>
@@ -1178,7 +1229,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="1">
+            <item row="4" column="1">
              <widget class="ctkSliderWidget" name="InputGlyphArrowShaftRadius">
               <property name="toolTip">
                <string>Adjust radius of arrow shaft</string>
@@ -1197,7 +1248,7 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="0">
+            <item row="5" column="0">
              <widget class="QLabel" name="ShaftResolutionLabel">
               <property name="toolTip">
                <string>Adjust resolution of arrow (lower is less detailed)</string>
@@ -1207,7 +1258,7 @@
               </property>
              </widget>
             </item>
-            <item row="3" column="1">
+            <item row="5" column="1">
              <widget class="ctkSliderWidget" name="InputGlyphArrowResolution">
               <property name="toolTip">
                <string>Adjust resolution of arrow (lower is less detailed)</string>
@@ -1232,10 +1283,29 @@
               </property>
              </widget>
             </item>
+            <item row="1" column="0">
+             <widget class="QRadioButton" name="InputGlyphArrowScaleDirectional">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Scale glyph only along direction of vector</string>
+              </property>
+              <property name="text">
+               <string>Directional Scaling</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
-         <item row="6" column="2" colspan="2">
+         <item row="7" column="2" colspan="2">
           <widget class="ctkComboBox" name="GlyphSourceComboBox">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1266,7 +1336,7 @@
            </item>
           </widget>
          </item>
-         <item row="6" column="1">
+         <item row="7" column="1">
           <widget class="QLabel" name="label_2">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
@@ -1282,7 +1352,7 @@
            </property>
           </widget>
          </item>
-         <item row="12" column="1" colspan="3">
+         <item row="13" column="1" colspan="3">
           <widget class="ctkCollapsibleGroupBox" name="ConeSourceOptions">
            <property name="enabled">
             <bool>false</bool>
@@ -1309,7 +1379,42 @@
             <property name="fieldGrowthPolicy">
              <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
             </property>
+            <item row="0" column="0">
+             <widget class="QRadioButton" name="InputGlyphConeScaleIsotropic">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Scale glyph in all directions</string>
+              </property>
+              <property name="text">
+               <string>Isotropic Scaling</string>
+              </property>
+             </widget>
+            </item>
             <item row="1" column="0">
+             <widget class="QRadioButton" name="InputGlyphConeScaleDirectional">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="toolTip">
+               <string>Scale glyph only along direction of vector</string>
+              </property>
+              <property name="text">
+               <string>Directional Scaling</string>
+              </property>
+              <property name="checked">
+               <bool>true</bool>
+              </property>
+             </widget>
+            </item>
+            <item row="3" column="0">
              <widget class="QLabel" name="label_3">
               <property name="toolTip">
                <string>Adjust height of cone</string>
@@ -1319,71 +1424,7 @@
               </property>
              </widget>
             </item>
-            <item row="2" column="0">
-             <widget class="QLabel" name="label_4">
-              <property name="toolTip">
-               <string>Adjust radius of base of cone</string>
-              </property>
-              <property name="text">
-               <string>Base Radius</string>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="1">
-             <widget class="ctkSliderWidget" name="InputGlyphConeRadius">
-              <property name="toolTip">
-               <string>Adjust radius of base of cone</string>
-              </property>
-              <property name="singleStep">
-               <double>0.020000000000000</double>
-              </property>
-              <property name="pageStep">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
             <item row="3" column="1">
-             <widget class="ctkSliderWidget" name="InputGlyphConeResolution">
-              <property name="toolTip">
-               <string>Adjust resolution of cone (lower is less detailed)</string>
-              </property>
-              <property name="decimals">
-               <number>0</number>
-              </property>
-              <property name="singleStep">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="pageStep">
-               <double>1.000000000000000</double>
-              </property>
-              <property name="minimum">
-               <double>6.000000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>24.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>6.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QLabel" name="label_6">
-              <property name="toolTip">
-               <string>Adjust resolution of cone (lower is less detailed)</string>
-              </property>
-              <property name="text">
-               <string>Resolution</string>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="1">
              <widget class="ctkSliderWidget" name="InputGlyphConeHeight">
               <property name="toolTip">
                <string>Adjust height of cone</string>
@@ -1402,10 +1443,74 @@
               </property>
              </widget>
             </item>
+            <item row="4" column="0">
+             <widget class="QLabel" name="label_4">
+              <property name="toolTip">
+               <string>Adjust radius of base of cone</string>
+              </property>
+              <property name="text">
+               <string>Base Radius</string>
+              </property>
+             </widget>
+            </item>
+            <item row="4" column="1">
+             <widget class="ctkSliderWidget" name="InputGlyphConeRadius">
+              <property name="toolTip">
+               <string>Adjust radius of base of cone</string>
+              </property>
+              <property name="singleStep">
+               <double>0.020000000000000</double>
+              </property>
+              <property name="pageStep">
+               <double>0.010000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>1.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="0">
+             <widget class="QLabel" name="label_6">
+              <property name="toolTip">
+               <string>Adjust resolution of cone (lower is less detailed)</string>
+              </property>
+              <property name="text">
+               <string>Resolution</string>
+              </property>
+             </widget>
+            </item>
+            <item row="5" column="1">
+             <widget class="ctkSliderWidget" name="InputGlyphConeResolution">
+              <property name="toolTip">
+               <string>Adjust resolution of cone (lower is less detailed)</string>
+              </property>
+              <property name="decimals">
+               <number>2</number>
+              </property>
+              <property name="singleStep">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="pageStep">
+               <double>1.000000000000000</double>
+              </property>
+              <property name="minimum">
+               <double>6.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>24.000000000000000</double>
+              </property>
+              <property name="value">
+               <double>6.000000000000000</double>
+              </property>
+             </widget>
+            </item>
            </layout>
           </widget>
          </item>
-         <item row="13" column="1" colspan="3">
+         <item row="14" column="1" colspan="3">
           <widget class="ctkCollapsibleGroupBox" name="SphereSourceOptions">
            <property name="enabled">
             <bool>false</bool>
@@ -1448,7 +1553,7 @@
                <string>Adjust resolution of sphere (lower is less detailed)</string>
               </property>
               <property name="decimals">
-               <number>0</number>
+               <number>2</number>
               </property>
               <property name="singleStep">
                <double>1.000000000000000</double>
@@ -1470,104 +1575,7 @@
            </layout>
           </widget>
          </item>
-         <item row="4" column="1" colspan="3">
-          <widget class="ctkCollapsibleGroupBox" name="GlyphScaleBox">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Minimum" vsizetype="MinimumExpanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>0</height>
-            </size>
-           </property>
-           <property name="title">
-            <string>Scaling</string>
-           </property>
-           <layout class="QFormLayout" name="formLayout_5">
-            <property name="fieldGrowthPolicy">
-             <enum>QFormLayout::AllNonFixedFieldsGrow</enum>
-            </property>
-            <item row="0" column="0">
-             <widget class="QLabel" name="label">
-              <property name="toolTip">
-               <string>Adjust amount to scale size of glyph</string>
-              </property>
-              <property name="text">
-               <string>Scale Factor</string>
-              </property>
-             </widget>
-            </item>
-            <item row="0" column="1">
-             <widget class="ctkSliderWidget" name="InputGlyphScale">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>Adjust amount to scale size of glyph</string>
-              </property>
-              <property name="decimals">
-               <number>2</number>
-              </property>
-              <property name="singleStep">
-               <double>0.050000000000000</double>
-              </property>
-              <property name="pageStep">
-               <double>0.010000000000000</double>
-              </property>
-              <property name="maximum">
-               <double>10.000000000000000</double>
-              </property>
-              <property name="value">
-               <double>1.000000000000000</double>
-              </property>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QRadioButton" name="InputGlyphScaleDirectional">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>Scale glyph only along direction of vector</string>
-              </property>
-              <property name="text">
-               <string>Directional Scaling</string>
-              </property>
-              <property name="checked">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QRadioButton" name="InputGlyphScaleIsotropic">
-              <property name="sizePolicy">
-               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                <horstretch>0</horstretch>
-                <verstretch>0</verstretch>
-               </sizepolicy>
-              </property>
-              <property name="toolTip">
-               <string>Scale glyph in all directions</string>
-              </property>
-              <property name="text">
-               <string>Isotropic Scaling</string>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </widget>
-         </item>
-         <item row="14" column="1">
+         <item row="15" column="1">
           <widget class="QLabel" name="label_5">
            <property name="toolTip">
             <string>Seed used for placement of glyphs</string>
@@ -1577,7 +1585,7 @@
            </property>
           </widget>
          </item>
-         <item row="14" column="2">
+         <item row="15" column="2">
           <widget class="QSpinBox" name="InputGlyphSeed">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1608,7 +1616,7 @@
            </property>
           </widget>
          </item>
-         <item row="14" column="3">
+         <item row="15" column="3">
           <widget class="QPushButton" name="GenerateSeedButton">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
@@ -1630,12 +1638,35 @@
             <string>Only create glyphs within threshold values</string>
            </property>
            <property name="text">
-            <string>Magnitude Threshold</string>
+            <string>Threshold</string>
            </property>
           </widget>
          </item>
          <item row="1" column="2" colspan="2">
-          <widget class="ctkRangeWidget" name="InputGlyphThreshold">
+          <widget class="qMRMLRangeWidget" name="InputGlyphThreshold">
+           <property name="singleStep">
+            <double>0.250000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="maximumValue">
+            <double>100.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="QLabel" name="label">
+           <property name="toolTip">
+            <string>Adjust amount to scale size of glyph</string>
+           </property>
+           <property name="text">
+            <string>Scale Factor</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="2" colspan="2">
+          <widget class="ctkSliderWidget" name="InputGlyphScale">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
              <horstretch>0</horstretch>
@@ -1643,19 +1674,22 @@
             </sizepolicy>
            </property>
            <property name="toolTip">
-            <string>Only create glyphs within threshold values</string>
+            <string>Adjust amount to scale size of glyph</string>
            </property>
            <property name="decimals">
-            <number>4</number>
+            <number>2</number>
            </property>
            <property name="singleStep">
+            <double>0.050000000000000</double>
+           </property>
+           <property name="pageStep">
             <double>0.010000000000000</double>
            </property>
            <property name="maximum">
-            <double>0.000000000000000</double>
+            <double>10.000000000000000</double>
            </property>
-           <property name="maximumValue">
-            <double>0.000000000000000</double>
+           <property name="value">
+            <double>1.000000000000000</double>
            </property>
           </widget>
          </item>
@@ -1869,7 +1903,7 @@
             <string>Number of glyphs to generate</string>
            </property>
            <property name="text">
-            <string>Number of Glyphs</string>
+            <string>Glyphs</string>
            </property>
           </widget>
          </item>
@@ -1907,32 +1941,7 @@
             <string>Only create glyphs within threshold values</string>
            </property>
            <property name="text">
-            <string>Magnitude Threshold</string>
-           </property>
-          </widget>
-         </item>
-         <item row="2" column="1" colspan="2">
-          <widget class="ctkRangeWidget" name="InputGlyphSliceThreshold">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="toolTip">
-            <string>Only create glyphs within threshold values</string>
-           </property>
-           <property name="decimals">
-            <number>4</number>
-           </property>
-           <property name="singleStep">
-            <double>0.010000000000000</double>
-           </property>
-           <property name="maximum">
-            <double>0.000000000000000</double>
-           </property>
-           <property name="maximumValue">
-            <double>0.000000000000000</double>
+            <string>Threshold</string>
            </property>
           </widget>
          </item>
@@ -2070,6 +2079,19 @@
            </property>
           </widget>
          </item>
+         <item row="2" column="1" colspan="2">
+          <widget class="qMRMLRangeWidget" name="InputGlyphSliceThreshold">
+           <property name="singleStep">
+            <double>0.250000000000000</double>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="maximumValue">
+            <double>100.000000000000000</double>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -2092,57 +2114,6 @@
      </property>
     </spacer>
    </item>
-   <item>
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="VolumeDisabledLabel">
-     <property name="text">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; color:#ff0000;&quot;&gt;No input volume selected&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QLabel" name="ModelDisabledLabel">
-     <property name="text">
-      <string>&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.0//EN&quot; &quot;http://www.w3.org/TR/REC-html40/strict.dtd&quot;&gt;
-&lt;html&gt;&lt;head&gt;&lt;meta name=&quot;qrichtext&quot; content=&quot;1&quot; /&gt;&lt;style type=&quot;text/css&quot;&gt;
-p, li { white-space: pre-wrap; }
-&lt;/style&gt;&lt;/head&gt;&lt;body style=&quot; font-family:'MS Shell Dlg 2'; font-size:8.25pt; font-weight:400; font-style:normal;&quot;&gt;
-&lt;p style=&quot; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;&quot;&gt;&lt;span style=&quot; font-size:8pt; font-weight:600; color:#ff0000;&quot;&gt;No output model selected&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-     </property>
-    </widget>
-   </item>
-   <item>
-    <widget class="QPushButton" name="ApplyButton">
-     <property name="enabled">
-      <bool>false</bool>
-     </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>60</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>Apply</string>
-     </property>
-    </widget>
-   </item>
   </layout>
  </widget>
  <customwidgets>
@@ -2151,6 +2122,11 @@ p, li { white-space: pre-wrap; }
    <extends>QWidget</extends>
    <header>qMRMLNodeComboBox.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>qMRMLRangeWidget</class>
+   <extends>ctkRangeWidget</extends>
+   <header>qMRMLRangeWidget.h</header>
   </customwidget>
   <customwidget>
    <class>qSlicerWidget</class>
@@ -2235,11 +2211,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>164</x>
-     <y>510</y>
+     <x>172</x>
+     <y>697</y>
     </hint>
    </hints>
   </connection>
@@ -2251,11 +2227,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>201</x>
-     <y>510</y>
+     <x>209</x>
+     <y>697</y>
     </hint>
    </hints>
   </connection>
@@ -2267,11 +2243,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2283,11 +2259,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2299,11 +2275,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>299</x>
-     <y>510</y>
+     <x>307</x>
+     <y>697</y>
     </hint>
    </hints>
   </connection>
@@ -2315,11 +2291,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>265</x>
-     <y>510</y>
+     <x>273</x>
+     <y>697</y>
     </hint>
    </hints>
   </connection>
@@ -2331,11 +2307,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2347,11 +2323,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2362,8 +2338,8 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -2378,8 +2354,8 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -2394,12 +2370,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2410,12 +2386,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2442,12 +2418,12 @@ p, li { white-space: pre-wrap; }
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2459,11 +2435,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2474,12 +2450,12 @@ p, li { white-space: pre-wrap; }
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2491,11 +2467,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2507,11 +2483,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2523,11 +2499,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2539,11 +2515,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2554,12 +2530,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2570,12 +2546,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2587,11 +2563,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2603,11 +2579,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2619,11 +2595,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2634,12 +2610,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2650,12 +2626,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -2666,12 +2642,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2682,12 +2658,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2698,12 +2674,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2714,12 +2690,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2730,12 +2706,12 @@ p, li { white-space: pre-wrap; }
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>57</x>
-     <y>510</y>
+     <x>65</x>
+     <y>697</y>
     </hint>
    </hints>
   </connection>
@@ -2746,12 +2722,12 @@ p, li { white-space: pre-wrap; }
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>100</x>
-     <y>294</y>
+     <x>106</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
-     <x>46</x>
-     <y>510</y>
+     <x>54</x>
+     <y>697</y>
     </hint>
    </hints>
   </connection>
@@ -2762,12 +2738,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>96</x>
-     <y>293</y>
+     <x>104</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2778,12 +2754,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>93</x>
-     <y>294</y>
+     <x>101</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2795,11 +2771,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2811,11 +2787,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2826,12 +2802,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2842,12 +2818,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2859,11 +2835,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2875,11 +2851,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2890,12 +2866,12 @@ p, li { white-space: pre-wrap; }
    <slot>show()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2906,12 +2882,12 @@ p, li { white-space: pre-wrap; }
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2922,8 +2898,8 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>163</x>
@@ -2938,8 +2914,8 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>277</x>
@@ -2954,12 +2930,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2970,12 +2946,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -2986,12 +2962,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3002,12 +2978,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>101</x>
-     <y>396</y>
+     <x>103</x>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3018,12 +2994,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>60</x>
-     <y>396</y>
+     <x>68</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -3034,12 +3010,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -3051,11 +3027,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3067,11 +3043,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3083,11 +3059,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3099,11 +3075,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>294</y>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3114,12 +3090,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>293</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3130,12 +3106,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>294</y>
+     <x>328</x>
+     <y>423</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3147,11 +3123,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3163,11 +3139,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>106</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3178,12 +3154,12 @@ p, li { white-space: pre-wrap; }
    <slot>hide()</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3194,12 +3170,12 @@ p, li { white-space: pre-wrap; }
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>376</x>
-     <y>358</y>
+     <x>328</x>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3211,7 +3187,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -3227,7 +3203,7 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>328</x>
@@ -3243,11 +3219,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3259,11 +3235,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3275,11 +3251,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3291,11 +3267,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3307,11 +3283,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -3323,11 +3299,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>111</x>
+     <y>752</y>
     </hint>
    </hints>
   </connection>
@@ -3339,11 +3315,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3355,11 +3331,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3371,11 +3347,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3387,11 +3363,11 @@ p, li { white-space: pre-wrap; }
    <hints>
     <hint type="sourcelabel">
      <x>221</x>
-     <y>358</y>
+     <y>487</y>
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3423,7 +3399,7 @@ p, li { white-space: pre-wrap; }
     </hint>
     <hint type="destinationlabel">
      <x>103</x>
-     <y>396</y>
+     <y>525</y>
     </hint>
    </hints>
   </connection>
@@ -3438,8 +3414,8 @@ p, li { white-space: pre-wrap; }
      <y>772</y>
     </hint>
     <hint type="destinationlabel">
-     <x>103</x>
-     <y>396</y>
+     <x>97</x>
+     <y>525</y>
     </hint>
    </hints>
   </connection>

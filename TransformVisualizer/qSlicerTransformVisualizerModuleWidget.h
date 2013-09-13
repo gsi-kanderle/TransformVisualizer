@@ -24,7 +24,6 @@
 
 // SlicerQt includes
 #include "qSlicerAbstractModuleWidget.h"
-
 #include "qSlicerTransformVisualizerModuleExport.h"
 
 class qSlicerTransformVisualizerModuleWidgetPrivate;
@@ -47,16 +46,17 @@ public:
 public slots:
   virtual void setMRMLScene(vtkMRMLScene*);
   void onSceneImportedEvent();
-  void setTransformVisualizerParametersNode(vtkMRMLNode *node);
-  void updateWidgetFromMRML();
+  void setTransformVisualizerParametersNode(vtkMRMLNode*);
+  void update();
+  void updateLabels();
 
   void visualize();
 
 protected slots:
   void onLogicModified();
-  void updateSourceOptions(int);
+  void updateGlyphSourceOptions(int);
   
-  void inputVolumeChanged(vtkMRMLNode*);
+  void inputChanged(vtkMRMLNode*);
   void referenceVolumeChanged(vtkMRMLNode*);
   void outputModelChanged(vtkMRMLNode*);
   
@@ -64,18 +64,20 @@ protected slots:
   // Glyph Parameters
   void setGlyphPointMax(double);
   void setGlyphScale(double);
-  void setGlyphScaleDirectional(bool);
-  void setGlyphScaleIsotropic(bool);
   void setGlyphThreshold(double, double);
   void setGlyphSeed(int);
   void setSeed();
   void setGlyphSourceOption(int);
   // Arrow Parameters
+  void setGlyphArrowScaleDirectional(bool);
+  void setGlyphArrowScaleIsotropic(bool);  
   void setGlyphArrowTipLength(double);
   void setGlyphArrowTipRadius(double);
   void setGlyphArrowShaftRadius(double);
   void setGlyphArrowResolution(double);
   // Cone Parameters
+  void setGlyphConeScaleDirectional(bool);
+  void setGlyphConeScaleIsotropic(bool);  
   void setGlyphConeHeight(double);
   void setGlyphConeRadius(double);
   void setGlyphConeResolution(double);

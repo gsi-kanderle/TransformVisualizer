@@ -69,7 +69,6 @@ public:
   
   /*!
    * TODO: Add description of the function itself and its arguments
-   * \param option (it is named option in the source but it tells nothing, please rename)
    */
   void CreateVisualization(int visualizationMode);
   
@@ -80,10 +79,6 @@ public:
   void GlyphSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>); 
   void GridSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>);
 
-  /*!
-   * Issue when input data is changed without modifying node
-   * Will either remake or account for scenario some other way
-   */
   void GenerateDeformationField();
   double* GetFieldRange();
 

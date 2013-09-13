@@ -46,9 +46,9 @@ public:
   virtual void UpdateReferenceID(const char *oldID, const char *newID);
 
 public:
-  vtkSetStringMacro(InputVolumeNodeID);
-  vtkGetStringMacro(InputVolumeNodeID);
-  void SetAndObserveInputVolumeNodeID(const char* id);
+  vtkSetStringMacro(InputNodeID);
+  vtkGetStringMacro(InputNodeID);
+  void SetAndObserveInputNodeID(const char* id);
 
   vtkSetStringMacro(ReferenceVolumeNodeID);
   vtkGetStringMacro(ReferenceVolumeNodeID);
@@ -63,10 +63,6 @@ public:
   vtkGetMacro(GlyphPointMax, int);
   vtkSetMacro(GlyphScale, float);
   vtkGetMacro(GlyphScale, float);
-  vtkSetMacro(GlyphScaleDirectional, bool);
-  vtkGetMacro(GlyphScaleDirectional, bool);
-  vtkSetMacro(GlyphScaleIsotropic, bool);
-  vtkGetMacro(GlyphScaleIsotropic, bool);
   vtkSetMacro(GlyphThresholdMax, double);
   vtkGetMacro(GlyphThresholdMax, double);
   vtkSetMacro(GlyphThresholdMin, double);
@@ -76,6 +72,10 @@ public:
   vtkSetMacro(GlyphSourceOption, int);
   vtkGetMacro(GlyphSourceOption, int);
   // Arrow Parameters
+  vtkSetMacro(GlyphArrowScaleDirectional, bool);
+  vtkGetMacro(GlyphArrowScaleDirectional, bool);
+  vtkSetMacro(GlyphArrowScaleIsotropic, bool);
+  vtkGetMacro(GlyphArrowScaleIsotropic, bool);  
   vtkSetMacro(GlyphArrowTipLength, float);
   vtkGetMacro(GlyphArrowTipLength, float);
   vtkSetMacro(GlyphArrowTipRadius, float);
@@ -85,6 +85,10 @@ public:
   vtkSetMacro(GlyphArrowResolution, int);
   vtkGetMacro(GlyphArrowResolution, int);
   // Cone Parameters
+  vtkSetMacro(GlyphConeScaleDirectional, bool);
+  vtkGetMacro(GlyphConeScaleDirectional, bool);
+  vtkSetMacro(GlyphConeScaleIsotropic, bool);
+  vtkGetMacro(GlyphConeScaleIsotropic, bool);    
   vtkSetMacro(GlyphConeHeight, float);
   vtkGetMacro(GlyphConeHeight, float);
   vtkSetMacro(GlyphConeRadius, float);
@@ -110,10 +114,8 @@ public:
   // Contour Parameters
   vtkSetMacro(ContourNumber, int);
   vtkGetMacro(ContourNumber, int);
-  vtkSetMacro(ContourMin, float);
-  vtkGetMacro(ContourMin, float);
-  vtkSetMacro(ContourMax, float);
-  vtkGetMacro(ContourMax, float);
+  void SetContourValues(double*, int size);
+  double* GetContourValues();
   vtkSetMacro(ContourDecimation, float);
   vtkGetMacro(ContourDecimation, float); 
   
@@ -148,7 +150,7 @@ protected:
   vtkMRMLTransformVisualizerNode(const vtkMRMLTransformVisualizerNode&);
   void operator=(const vtkMRMLTransformVisualizerNode&);
   
-  char* InputVolumeNodeID;
+  char* InputNodeID;
   char* ReferenceVolumeNodeID;
   char* OutputModelNodeID;
 
@@ -158,19 +160,21 @@ protected:
   int GlyphPointMax;
   //TODO: Need to change the UI into float too
   float GlyphScale;
-  bool GlyphScaleDirectional;
-  bool GlyphScaleIsotropic;
   double GlyphThresholdMax;
   double GlyphThresholdMin;
   int GlyphSeed;
   int GlyphSourceOption; //0 - Arrow, 1 - Cone, 2 - Sphere
   // Arrow Parameters
+  bool GlyphArrowScaleDirectional;
+  bool GlyphArrowScaleIsotropic;  
   float GlyphArrowTipLength;
   float GlyphArrowTipRadius;
   float GlyphArrowShaftRadius;
   int GlyphArrowResolution;
   
   // Cone Parameters
+  bool GlyphConeScaleDirectional;
+  bool GlyphConeScaleIsotropic;    
   float GlyphConeHeight;
   float GlyphConeRadius;
   int GlyphConeResolution;
@@ -188,8 +192,7 @@ protected:
     
   // Contour Parameters
   int ContourNumber;
-  float ContourMin;
-  float ContourMax;
+  double* ContourValues;
   float ContourDecimation;
 
   // Glyph Slice Parameters
