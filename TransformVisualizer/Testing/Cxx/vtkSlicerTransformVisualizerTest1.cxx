@@ -409,9 +409,6 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   TransformVisualizerLogic->SetMRMLScene(mrmlScene);
   TransformVisualizerLogic->SetAndObserveTransformVisualizerNode(paramNode);
   
-  // TODO: Add check for successful transform field conversion
-  TransformVisualizerLogic->GenerateDeformationField();
-  
   //Emulate parameter adjustments that are done in qSlicerTransformVisualizerModuleWidget whenever an input volume is selected
   //paramNode->SetContourMin(range[0]);
   //paramNode->SetContourMax(range[1]);

@@ -253,7 +253,7 @@ void qSlicerTransformVisualizerModuleWidget::updateLabels()
     d->ApplyButton->setEnabled(true);
     d->VolumeDisabledLabel->hide();
     
-    if (strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLVectorVolumeNode") != 0 && d->InputReferenceComboBox->currentNode() == NULL)
+    if (!d->InputFieldComboBox->currentNode()->IsA("vtkMRMLVectorVolumeNode") && d->InputReferenceComboBox->currentNode() == NULL)
     {
       d->ApplyButton->setEnabled(false);
       d->ReferenceDisabledLabel->show();
@@ -321,31 +321,17 @@ void qSlicerTransformVisualizerModuleWidget::onLogicModified()
 void qSlicerTransformVisualizerModuleWidget::visualize()
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
-
+  
+  // TODO: Check for empty reference volume
   if (d->InputFieldComboBox->currentNodeID() != NULL && d->OutputModelComboBox->currentNodeID() != NULL)
   {
-  //TODO: Remake progress dialog and add detail (update progress from actual steps occurring in logic)
     QProgressDialog *visualizeProgress =  new QProgressDialog(qSlicerApplication::application()->mainWindow());
     visualizeProgress->setCancelButton(0);
     visualizeProgress->setModal(true);
-    visualizeProgress->setMinimumDuration(100); //will matter a bit more after progress dialog is remade
+    visualizeProgress->setMinimumDuration(100);
     visualizeProgress->show();
   visualizeProgress->setLabelText("Processing...");
     visualizeProgress->setValue(0);
-  
-  if (strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
-    strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
-    strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLGridTransformNode") == 0)
-  { 
-    visualizeProgress->setLabelText("Generating deformation field...");
-    visualizeProgress->setValue(10);
-    d->logic()->GenerateDeformationField();
-  }
-  else if (strcmp(d->InputFieldComboBox->currentNode()->GetClassName(), "vtkMRMLVectorVolumeNode") != 0)
-  {
-    std::cerr << "Error: Unsupported input type" << std::endl;
-    return;
-  }
   
   if (d->GlyphToggle->isChecked())
   {
@@ -457,19 +443,17 @@ void qSlicerTransformVisualizerModuleWidget::inputChanged(vtkMRMLNode* node)
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
   vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene() || !node)
+  if (pNode == NULL || this->mrmlScene() == NULL || node == NULL)
   {
     std::cerr << "Error: Unable to set input attribute" << std::endl;
     return;
   }
   
-  if (strcmp(node->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
-    strcmp(node->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
-    strcmp(node->GetClassName(), "vtkMRMLGridTransformNode") == 0)
+  if (node->IsA("vtkMRMLLinearTransformNode") || node->IsA("vtkMRMLBSplineTransformNode") || node->IsA("vtkMRMLGridTransformNode"))
   { 
     d->InputReferenceComboBox->setEnabled(true);
   }
-  else if (strcmp(node->GetClassName(), "vtkMRMLVectorVolumeNode") == 0)
+  else if (node->IsA("vtkMRMLVectorVolumeNode"))
   {
     d->InputReferenceComboBox->setEnabled(false);
   }
@@ -478,7 +462,6 @@ void qSlicerTransformVisualizerModuleWidget::inputChanged(vtkMRMLNode* node)
     std::cerr << "Error: Unsupported input type" << std::endl;
     return;  
   }
-  
   pNode->SetAndObserveInputNodeID(node->GetID());
   this->updateLabels();
 }

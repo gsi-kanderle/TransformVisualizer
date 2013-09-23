@@ -79,9 +79,6 @@ public:
   void GlyphSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>); 
   void GridSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>);
 
-  void GenerateDeformationField();
-  double* GetFieldRange();
-
 public:
   void SetAndObserveTransformVisualizerNode(vtkMRMLTransformVisualizerNode *node);
   vtkGetObjectMacro(TransformVisualizerNode, vtkMRMLTransformVisualizerNode);
@@ -94,22 +91,14 @@ protected:
 
   virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene);
 
-  virtual void UpdateFromMRMLScene();
-  virtual void OnMRMLSceneNodeAdded(vtkMRMLNode* node);
-  virtual void OnMRMLSceneNodeRemoved(vtkMRMLNode* node);
-  virtual void OnMRMLSceneEndImport();
-  virtual void OnMRMLSceneEndClose();
-
-protected:
-  vtkImageData* deformationField;
-  
 private:
   vtkSlicerTransformVisualizerLogic(const vtkSlicerTransformVisualizerLogic&);// Not implemented
   void operator=(const vtkSlicerTransformVisualizerLogic&);// Not implemented
-  
+
 protected:
   /// Parameter set MRML node
   vtkMRMLTransformVisualizerNode* TransformVisualizerNode;
+  
 };
 
 #endif

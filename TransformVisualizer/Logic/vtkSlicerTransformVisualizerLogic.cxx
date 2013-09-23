@@ -81,6 +81,8 @@
 #include <cassert>
 #include <math.h>
 
+#include <vtkTimerLog.h>
+
 #define EPSILON 0.0001
 
 //----------------------------------------------------------------------------
@@ -90,14 +92,12 @@ vtkStandardNewMacro(vtkSlicerTransformVisualizerLogic);
 vtkSlicerTransformVisualizerLogic::vtkSlicerTransformVisualizerLogic()
 {
   this->TransformVisualizerNode = NULL;
-  this->deformationField = vtkImageData::New();
 }
 
 //----------------------------------------------------------------------------
 vtkSlicerTransformVisualizerLogic::~vtkSlicerTransformVisualizerLogic()
 {
   vtkSetAndObserveMRMLNodeMacro(this->TransformVisualizerNode, NULL);
-  this->deformationField->Delete();
 }
 
 //----------------------------------------------------------------------------
@@ -126,150 +126,25 @@ void vtkSlicerTransformVisualizerLogic::SetMRMLSceneInternal(vtkMRMLScene * newS
 void vtkSlicerTransformVisualizerLogic::RegisterNodes()
 {
   vtkMRMLScene* scene = this->GetMRMLScene();
-  assert(scene != 0);
+  if (scene == NULL)
+  {
+    vtkErrorMacro("Null scene");
+    return;
+  }
   
   scene->RegisterNodeClass(vtkSmartPointer<vtkMRMLTransformVisualizerNode>::New());
-}
-
-//---------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::UpdateFromMRMLScene()
-{
-  assert(this->GetMRMLScene() != 0);
-  this->Modified();
-}
-
-//---------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::OnMRMLSceneNodeAdded(vtkMRMLNode* node)
-{
-  if (!node || !this->GetMRMLScene())
-  {
-    return;
-  }
-
-  if (node->IsA("vtkMRMLVectorVolumeNode") ||
-    node->IsA("vtkMRMLLinearTransformNode") || 
-    node->IsA("vtkMRMLGridTransformNode") || 
-    node->IsA("vtkMRMLBSplineTransformNode") || 
-    node->IsA("vtkMRMLTransformVisualizerNode"))
-{
-    this->Modified();
-  }
-}
-
-//---------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::OnMRMLSceneNodeRemoved(vtkMRMLNode* node)
-{
-  if (!node || !this->GetMRMLScene())
-  {
-    return;
-  }
-
-  if (node->IsA("vtkMRMLVectorVolumeNode") ||
-    node->IsA("vtkMRMLLinearTransformNode") || 
-    node->IsA("vtkMRMLGridTransformNode") || 
-    node->IsA("vtkMRMLBSplineTransformNode") || 
-    node->IsA("vtkMRMLTransformVisualizerNode"))
-  {
-    this->Modified();
-  }
-}
-
-//---------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::OnMRMLSceneEndImport()
-{
-  //Select parameter node if it exists
-  vtkSmartPointer<vtkMRMLTransformVisualizerNode> paramNode = NULL;
-  vtkSmartPointer<vtkMRMLNode> node = this->GetMRMLScene()->GetNthNodeByClass(0, "vtkMRMLTransformVisualizerNode");
-  if (node)
-  {
-    paramNode = vtkMRMLTransformVisualizerNode::SafeDownCast(node);
-    vtkSetAndObserveMRMLNodeMacro(this->TransformVisualizerNode, paramNode);
-  }
-}
-
-//---------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::OnMRMLSceneEndClose()
-{
-  this->Modified();
-}
-
-//----------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::GenerateDeformationField()
-{
-  vtkSmartPointer<vtkMRMLTransformNode> inputNode = vtkMRMLTransformNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
-  if (inputNode == NULL)
-  {
-    vtkErrorMacro("Failed to convert input: input node is invalid");
-    return;
-  }
-  
-  vtkSmartPointer<vtkMRMLVolumeNode> referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
-  if (referenceVolumeNode == NULL)
-  {
-    vtkErrorMacro("Failed to convert input: reference volume node is invalid");
-    return;
-  }
-  
-  const double *spacing = referenceVolumeNode->GetSpacing();
-  const int *extent = referenceVolumeNode->GetImageData()->GetExtent();
-  vtkSmartPointer<vtkMatrix4x4> IJKToRAS = vtkSmartPointer<vtkMatrix4x4>::New();  
-  referenceVolumeNode->GetIJKToRASMatrix(IJKToRAS);
-  
-  this->deformationField->DeepCopy(referenceVolumeNode->GetImageData());
-  this->deformationField->SetScalarTypeToFloat();
-  this->deformationField->SetNumberOfScalarComponents(3);
-  this->deformationField->AllocateScalars();
-  this->deformationField->SetSpacing(spacing[0], spacing[1], spacing[2]);
-  this->deformationField->GetPointData()->SetActiveVectors("ImageScalars");
-  this->deformationField->Update();
-  
-  //*
-  float fixedPoint[3];
-  float movingPoint[3];
-  
-  vtkSmartPointer<vtkGeneralTransform> inputTransform = inputNode->GetTransformToParent();
-  float *ptr = (float *)this->deformationField->GetScalarPointer();
-  for(int k = 0; k < extent[5]+1; k++)
-  {
-    for(int j = 0; j < extent[3]+1; j++)
-    {
-      for(int i = 0; i < extent[1]+1; i++)
-      {
-        fixedPoint[0] = i*IJKToRAS->GetElement(0,0) + j*IJKToRAS->GetElement(0,1) + k*IJKToRAS->GetElement(0,2) + IJKToRAS->GetElement(0,3);
-        fixedPoint[1] = i*IJKToRAS->GetElement(1,0) + j*IJKToRAS->GetElement(1,1) + k*IJKToRAS->GetElement(1,2) + IJKToRAS->GetElement(1,3);
-        fixedPoint[2] = i*IJKToRAS->GetElement(2,0) + j*IJKToRAS->GetElement(2,1) + k*IJKToRAS->GetElement(2,2) + IJKToRAS->GetElement(2,3);
-        
-        inputTransform->TransformPoint(fixedPoint, movingPoint);
-        
-        ptr[(i + j*(extent[1]+1) + k*(extent[1]+1)*(extent[3]+1))*3] = movingPoint[0] - fixedPoint[0];
-        ptr[(i + j*(extent[1]+1) + k*(extent[1]+1)*(extent[3]+1))*3 + 1] = movingPoint[1] - fixedPoint[1];
-        ptr[(i + j*(extent[1]+1) + k*(extent[1]+1)*(extent[3]+1))*3 + 2] = movingPoint[2] - fixedPoint[2];
-      }
-    }
-  }
-}
-
-//----------------------------------------------------------------------------
-double* vtkSlicerTransformVisualizerLogic::GetFieldRange()
-{
-  double* range = this->deformationField->GetPointData()->GetScalars()->GetRange(-1);
-  range[0] = floor(range[0]*10000)/10000;
-  range[1] = ceil(range[1]*10000)/10000;
-
-  return range;
 }
 
 //----------------------------------------------------------------------------
 void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMode)
 {
-  if (!this->TransformVisualizerNode || !this->GetMRMLScene())
+  if (this->TransformVisualizerNode == NULL || this->GetMRMLScene() == NULL)
   {
     vtkErrorMacro("CreateVisualization failed: Deformation Field Visualizer Node or scene is invalid");
     return;
   }
  
-  vtkSmartPointer<vtkMRMLModelNode> outputModelNode = vtkMRMLModelNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetOutputModelNodeID()));
-  outputModelNode->SetScene(this->GetMRMLScene());
+  vtkMRMLModelNode* outputModelNode = vtkMRMLModelNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetOutputModelNodeID()));
 
   if (outputModelNode == NULL)
   {
@@ -277,55 +152,104 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
     return;
   }
   
-  const double *origin;
+  vtkSmartPointer<vtkImageData> deformationField = vtkSmartPointer<vtkImageData>::New();
+  double *origin = new double[3]();
   double spacing[3] = {0,0,0};
   vtkSmartPointer<vtkMatrix4x4> ijkToRasDirections = vtkSmartPointer<vtkMatrix4x4>::New();
 
   //Initialize input
-  if (strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLVectorVolumeNode") == 0)
+  vtkMRMLNode* initialInputNode = this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID());
+  if (initialInputNode == NULL)
   {
+    vtkErrorMacro("CreateVisualization failed: Input node is invalid");
+    return;
+  }  
   
-    vtkSmartPointer<vtkMRMLVectorVolumeNode> inputNode = vtkMRMLVectorVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
-    if (inputNode == NULL)
-    {
-      vtkErrorMacro("CreateVisualization failed: Input node is invalid");
-      return;
-    }
+  if (initialInputNode->IsA("vtkMRMLVectorVolumeNode"))
+  {
+    vtkMRMLVectorVolumeNode* inputNode = vtkMRMLVectorVolumeNode::SafeDownCast(initialInputNode);
     
-    this->deformationField->DeepCopy(inputNode->GetImageData());
-    this->deformationField->GetPointData()->SetActiveVectors("ImageScalars");
+    deformationField->DeepCopy(inputNode->GetImageData());
+    deformationField->GetPointData()->SetActiveVectors("ImageScalars");
     
     origin = inputNode->GetOrigin();
     inputNode->GetIJKToRASDirectionMatrix(ijkToRasDirections);
     
     inputNode->GetSpacing(spacing);
-    this->deformationField->SetSpacing(spacing);
+    deformationField->SetSpacing(spacing);
   }
-  else if (strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLLinearTransformNode") == 0 || 
-  strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLBSplineTransformNode") == 0 ||
-  strcmp((this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName(), "vtkMRMLGridTransformNode") == 0)
+  else if (initialInputNode->IsA("vtkMRMLLinearTransformNode") || initialInputNode->IsA("vtkMRMLBSplineTransformNode") || initialInputNode->IsA("vtkMRMLGridTransformNode"))
   {
-    vtkSmartPointer<vtkMRMLVolumeNode> referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
+    vtkMRMLTransformNode* inputNode = vtkMRMLTransformNode::SafeDownCast(initialInputNode);
+    vtkMRMLVolumeNode* referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
     if (referenceVolumeNode == NULL)
     {
       vtkErrorMacro("CreateVisualization failed: Reference volume node is invalid");
       return;
-    }  
+    }
+    
+    const double *spacing = referenceVolumeNode->GetSpacing();
+    const int *extent = referenceVolumeNode->GetImageData()->GetExtent();
+    vtkSmartPointer<vtkMatrix4x4> IJKToRAS = vtkSmartPointer<vtkMatrix4x4>::New();  
+    referenceVolumeNode->GetIJKToRASMatrix(IJKToRAS);
+    
+    deformationField->DeepCopy(referenceVolumeNode->GetImageData());
+    typedef float DEF_FIELD_FLOAT;	
+    deformationField->SetScalarTypeToFloat();
+    deformationField->SetNumberOfScalarComponents(3);
+    deformationField->AllocateScalars();
+    deformationField->SetSpacing(spacing[0], spacing[1], spacing[2]);
+    deformationField->GetPointData()->SetActiveVectors("ImageScalars");
+    deformationField->Update();
+
+    DEF_FIELD_FLOAT fixedPoint[4] = {0,0,0,0};
+    DEF_FIELD_FLOAT movingPoint[4] = {0,0,0,0};
+    
+    vtkGeneralTransform* inputTransform = inputNode->GetTransformToParent();
+    float *ptr = (float *)deformationField->GetScalarPointer();
+    
+    #ifdef ENABLE_PERFORMANCE_PROFILING
+      vtkSmartPointer<vtkTimerLog> timer=vtkSmartPointer<vtkTimerLog>::New();      
+      timer->StartTimer();  
+    #endif
+    
+    for(int k = extent[4]; k < extent[5]+1; k++)
+    {
+      for(int j = extent[2]; j < extent[3]+1; j++)
+      {
+        for(int i = extent[0]; i < extent[1]+1; i++)
+        {
+          // TODO: replace with something more efficient, unless replaced by new input system
+          fixedPoint[0] = i*IJKToRAS->GetElement(0,0) + j*IJKToRAS->GetElement(0,1) + k*IJKToRAS->GetElement(0,2) + IJKToRAS->GetElement(0,3);
+          fixedPoint[1] = i*IJKToRAS->GetElement(1,0) + j*IJKToRAS->GetElement(1,1) + k*IJKToRAS->GetElement(1,2) + IJKToRAS->GetElement(1,3);
+          fixedPoint[2] = i*IJKToRAS->GetElement(2,0) + j*IJKToRAS->GetElement(2,1) + k*IJKToRAS->GetElement(2,2) + IJKToRAS->GetElement(2,3);
+          
+          inputTransform->TransformPoint(fixedPoint, movingPoint);
+          
+          ptr[(i + j*(extent[1]+1) + k*(extent[1]+1)*(extent[3]+1))*3] = movingPoint[0] - fixedPoint[0];
+          ptr[(i + j*(extent[1]+1) + k*(extent[1]+1)*(extent[3]+1))*3 + 1] = movingPoint[1] - fixedPoint[1];
+          ptr[(i + j*(extent[1]+1) + k*(extent[1]+1)*(extent[3]+1))*3 + 2] = movingPoint[2] - fixedPoint[2];
+        }
+      }
+    }    
+    
+    #ifdef ENABLE_PERFORMANCE_PROFILING
+      timer->StopTimer();
+      vtkWarningMacro("Generated deformation field from transform in " << timer->GetElapsedTime() << "sec\n");
+    #endif    
     
     origin = referenceVolumeNode->GetOrigin();
     referenceVolumeNode->GetIJKToRASDirectionMatrix(ijkToRasDirections);
   }
   else
   {
-    std::stringstream errorMessage;
-    errorMessage << "Invalid input node selected. Expected vtkMRMLVectorVolumeNode, vtkMRMLLinearTransformNode, vtkMRMLBSplineTransformNode, or vtkMRMLGridTransformNode, but got";
-    errorMessage << (this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName() << "instead" << std::endl;
+    vtkErrorMacro("Invalid input node selected. Expected vtkMRMLVectorVolumeNode, vtkMRMLLinearTransformNode, vtkMRMLBSplineTransformNode, or vtkMRMLGridTransformNode, but got" << (this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()))->GetClassName() << "instead");
     return;
   }
   
-  // The new field will be modified to the point where it no longer represents the original vectors. this->deformationField remains unmodified
+  // The new field will be modified to the point where it no longer represents the original vectors. deformationField remains unmodified
   vtkSmartPointer<vtkImageData> field = vtkSmartPointer<vtkImageData>::New();
-  field->DeepCopy(this->deformationField);
+  field->DeepCopy(deformationField);
 
   vtkSmartPointer<vtkMatrix4x4> rasToIjkDirections = vtkSmartPointer<vtkMatrix4x4>::New();
   rasToIjkDirections->DeepCopy(ijkToRasDirections);
@@ -334,6 +258,7 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
   double x = 0;
   double y = 0;
   double z = 0;
+  //Number of scalar components?
   float *ptr = (float *)field->GetScalarPointer();
   for(int i = 0; i < field->GetPointData()->GetScalars()->GetNumberOfTuples()*3; i+=3)
   {
@@ -435,7 +360,7 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
   if (outputModelNode->GetModelDisplayNode()->GetColorNode()==NULL)
   {
     vtkSmartPointer<vtkMRMLColorTableNode> colorTableNode = vtkSmartPointer<vtkMRMLColorTableNode>::New();
-    colorTableNode = vtkMRMLColorTableNode::SafeDownCast(this->GetMRMLScene()->AddNode(colorTableNode));
+    this->GetMRMLScene()->AddNode(colorTableNode);
     
     colorTableNode->SetName("Deformation Field Colors");
     colorTableNode->SetAttribute("Category", "User Generated");
@@ -449,11 +374,13 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
 
     outputModelNode->GetModelDisplayNode()->SetAndObserveColorNodeID(colorTableNode->GetID());
   }
-
+  
+  
   vtkMRMLColorTableNode *colorNode = vtkMRMLColorTableNode::SafeDownCast(outputModelNode->GetModelDisplayNode()->GetColorNode());
   if (colorNode != NULL)
   {
-    double* range = this->GetFieldRange();
+	//How to do after new input process?
+    double* range = deformationField->GetPointData()->GetScalars()->GetRange(-1);
     colorNode->GetLookupTable()->SetTableRange(range[0], range[1]);
   }
   
