@@ -17,31 +17,17 @@ public:
   void PrintSelf(ostream& os, vtkIndent indent);
   static vtkTransformVisualizerGlyph3D *New();
 
-  virtual int IsPointVisibleForListIndex(double vmag, vtkIdType ptId, int visibleListIndex);
-
-  vtkSetMacro(PointMax,int);
-  vtkGetMacro(PointMax,int);  
   vtkSetMacro(ScaleFactor,double);
   vtkGetMacro(ScaleFactor,double);
   vtkSetMacro(ScaleDirectional,bool);
   vtkGetMacro(ScaleDirectional,bool);
-  vtkSetMacro(Seed,double);
-  vtkGetMacro(Seed,double);
-  vtkSetMacro(MagnitudeMax,double);
-  vtkGetMacro(MagnitudeMax,double);
-  vtkSetMacro(MagnitudeMin,double);
-  vtkGetMacro(MagnitudeMin,double);
   
 protected:
   vtkTransformVisualizerGlyph3D();
   ~vtkTransformVisualizerGlyph3D() {};
   
-  int PointMax;
   double ScaleFactor;
   bool ScaleDirectional;
-  unsigned Seed;
-  double MagnitudeMax;
-  double MagnitudeMin;
   
   virtual int RequestData(vtkInformation *, vtkInformationVector **, vtkInformationVector *);
 

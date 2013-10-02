@@ -72,12 +72,15 @@ public:
    */
   void CreateVisualization(int visualizationMode);
   
+  void GlyphVisualization(vtkGeneralTransform*, vtkPolyData*, int);
+  /*
   void GlyphVisualization(vtkImageData*, vtkPolyData*, int);
   void GridVisualization(vtkImageData*, vtkPolyData* output);
   void ContourVisualization(vtkImageData*, vtkPolyData* output);
   void BlockVisualization(vtkImageData*, vtkPolyData* output);
   void GlyphSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>); 
   void GridSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>);
+  */
 
 public:
   void SetAndObserveTransformVisualizerNode(vtkMRMLTransformVisualizerNode *node);
