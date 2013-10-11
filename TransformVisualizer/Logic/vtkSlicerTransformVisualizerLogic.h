@@ -26,6 +26,7 @@
 #include "vtkSlicerModuleLogic.h"
 
 // MRML includes
+#include <vtkMRMLModelNode.h>
 
 // STD includes
 #include <cstdlib>
@@ -35,6 +36,7 @@
 #include <vtkPolyData.h>
 #include <vtkMatrix4x4.h>
 #include <vtkImageData.h>
+#include <vtkUnstructuredGrid.h>
 
 #include "vtkSlicerTransformVisualizerModuleLogicExport.h"
 
@@ -71,17 +73,19 @@ public:
    * TODO: Add description of the function itself and its arguments
    */
   void CreateVisualization(int visualizationMode);
+  void InitializeOutputModelNode(vtkMRMLModelNode* outputModelNode);
   
-  void GlyphVisualization(vtkGeneralTransform*, vtkPolyData*, int);
-  /*
-  void GlyphVisualization(vtkImageData*, vtkPolyData*, int);
+  void GlyphVisualization(bool inputIsTransform, vtkPolyData*, int);
+  void GlyphSliceVisualization(bool inputIsTransform, vtkPolyData*); 
+  void GlyphPreprocessInput(bool inputIsTransform, vtkUnstructuredGrid*, int seed, int pointMax, double min, double max);
+  
   void GridVisualization(vtkImageData*, vtkPolyData* output);
-  void ContourVisualization(vtkImageData*, vtkPolyData* output);
-  void BlockVisualization(vtkImageData*, vtkPolyData* output);
-  void GlyphSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>); 
   void GridSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>);
-  */
-
+  
+  void BlockVisualization(bool inputIsTransform, vtkPolyData* output);
+  
+  void ContourVisualization(bool inputIsTransform, vtkPolyData* output);
+  
 public:
   void SetAndObserveTransformVisualizerNode(vtkMRMLTransformVisualizerNode *node);
   vtkGetObjectMacro(TransformVisualizerNode, vtkMRMLTransformVisualizerNode);
@@ -91,8 +95,6 @@ protected:
   ~vtkSlicerTransformVisualizerLogic();
 
   virtual void RegisterNodes();
-
-  virtual void SetMRMLSceneInternal(vtkMRMLScene* newScene);
 
 private:
   vtkSlicerTransformVisualizerLogic(const vtkSlicerTransformVisualizerLogic&);// Not implemented
