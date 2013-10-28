@@ -53,6 +53,7 @@
 #include <vtkArrowSource.h>
 #include <vtkConeSource.h>
 #include <vtkSphereSource.h>
+#include <vtkProbeFilter.h>
 
 // Grid VTK includes
 #include <vtkCellArray.h>
@@ -179,9 +180,14 @@ void vtkSlicerTransformVisualizerLogic::CreateVisualization(int visualizationMod
   vtkPolyData* output = vtkPolyData::New();
   switch (visualizationMode){
     case VIS_MODE_GLYPH_3D:
-      this->GlyphVisualization(inputIsTransform, output, this->TransformVisualizerNode->GetGlyphSourceOption());
+      this->GlyphVisualization(inputIsTransform, output);
       outputModelNode->GetModelDisplayNode()->SetScalarVisibility(1);
       outputModelNode->GetModelDisplayNode()->SetActiveScalarName("VectorMagnitude");
+      break;
+    case VIS_MODE_GRID_3D:
+      this->GridVisualization(inputIsTransform, output);
+      outputModelNode->GetModelDisplayNode()->SetScalarVisibility(1);
+      //outputModelNode->GetModelDisplayNode()->SetActiveScalarName("VectorMagnitude");
       break;
     case VIS_MODE_GLYPH_2D:
       if (vtkMRMLSliceNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetGlyphSliceNodeID())) == NULL)
@@ -218,11 +224,10 @@ void vtkSlicerTransformVisualizerLogic::InitializeOutputModelNode(vtkMRMLModelNo
     vtkSmartPointer<vtkMRMLModelDisplayNode> displayNode = vtkSmartPointer<vtkMRMLModelDisplayNode>::New();
     displayNode = vtkMRMLModelDisplayNode::SafeDownCast(this->GetMRMLScene()->AddNode(displayNode));
     outputModelNode->SetAndObserveDisplayNodeID(displayNode->GetID());
+    outputModelNode->SetHideFromEditors(0);
+    outputModelNode->SetSelectable(1);
+    outputModelNode->Modified();
   }  
-  
-  outputModelNode->SetHideFromEditors(0);
-  outputModelNode->SetSelectable(1);
-  outputModelNode->Modified();
   
   if (outputModelNode->GetModelDisplayNode()->GetColorNode()==NULL)
   {
@@ -256,7 +261,7 @@ void vtkSlicerTransformVisualizerLogic::InitializeOutputModelNode(vtkMRMLModelNo
 
 //Glyph Visualization
 //----------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::GlyphVisualization(bool inputIsTransform, vtkPolyData* output, int sourceOption)
+void vtkSlicerTransformVisualizerLogic::GlyphVisualization(bool inputIsTransform, vtkPolyData* output)
 {
   //Pre-processing
   vtkSmartPointer<vtkUnstructuredGrid> pointSet = vtkSmartPointer<vtkUnstructuredGrid>::New();
@@ -269,7 +274,7 @@ void vtkSlicerTransformVisualizerLogic::GlyphVisualization(bool inputIsTransform
   glyphFilter->SetScaleFactor(this->TransformVisualizerNode->GetGlyphScale());
   glyphFilter->SetColorModeToColorByVector();
 
-  switch (sourceOption){
+  switch (this->TransformVisualizerNode->GetGlyphSourceOption()){
     //Arrows
     case ARROW_3D:
     {
@@ -327,11 +332,9 @@ void vtkSlicerTransformVisualizerLogic::GlyphSliceVisualization(bool inputIsTran
   this->GlyphPreprocessInput(inputIsTransform, pointSet, this->TransformVisualizerNode->GetGlyphSliceSeed(), this->TransformVisualizerNode->GetGlyphSlicePointMax(), 
                             this->TransformVisualizerNode->GetGlyphSliceThresholdMin(), this->TransformVisualizerNode->GetGlyphSliceThresholdMax());
   
-
   vtkSmartPointer<vtkRibbonFilter> ribbon = vtkSmartPointer<vtkRibbonFilter>::New();
   float sliceNormal[3] = {0,0,0};
   double width = 1;
-  const double* spacing = NULL;
   
   vtkMRMLSliceNode* sliceNode = vtkMRMLSliceNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetGlyphSliceNodeID()));
   vtkSmartPointer<vtkMatrix4x4> ijkToRasDirections = vtkSmartPointer<vtkMatrix4x4>::New();
@@ -340,13 +343,13 @@ void vtkSlicerTransformVisualizerLogic::GlyphSliceVisualization(bool inputIsTran
   {
     vtkMRMLVolumeNode* referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
     referenceVolumeNode->GetIJKToRASDirectionMatrix(ijkToRasDirections);
-    spacing = referenceVolumeNode->GetImageData()->GetSpacing();
+    width = referenceVolumeNode->GetMinSpacing(); //All input can now be expected to be isotropic so the width should be the smallest spacing
   }
   else
   {
     vtkMRMLVectorVolumeNode* inputVectorVolumeNode = vtkMRMLVectorVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
     inputVectorVolumeNode->GetIJKToRASDirectionMatrix(ijkToRasDirections);
-    spacing = inputVectorVolumeNode->GetSpacing();
+    width = inputVectorVolumeNode->GetMinSpacing();
   }
   rasToIjkDirections->DeepCopy(ijkToRasDirections);
   vtkSmartPointer<vtkMatrix4x4> sliceToIjk = vtkSmartPointer<vtkMatrix4x4>::New();
@@ -355,36 +358,6 @@ void vtkSlicerTransformVisualizerLogic::GlyphSliceVisualization(bool inputIsTran
   sliceNormal[0] = sliceToIjk->GetElement(0,2);
   sliceNormal[1] = sliceToIjk->GetElement(1,2);
   sliceNormal[2] = sliceToIjk->GetElement(2,2);
-  
-  if (abs(sliceNormal[0]) > EPSILON)
-  {
-    width = spacing[0];
-  }
-  else if (abs(sliceNormal[1]) > EPSILON)
-  {
-    width = spacing[1];
-  }    
-  else if (abs(sliceNormal[2]) > EPSILON)
-  {
-    width = spacing[2];
-  }
-  //Oblique
-  //TODO: Currently takes the largest spacing to avoid any issues. Only affects oblique slices, but will change later to a more precise method when slice options are updated
-  else
-  {
-    if (spacing[0] >= spacing[1] && spacing[0] >= spacing[2])
-    {
-      width = spacing[0];
-    }
-    else if (spacing[1] >= spacing[0] && spacing[1] >= spacing[2])
-    {
-      width = spacing[1];
-    }
-    else
-    {
-      width = spacing[2];
-    }
-  }
 
   vtkSmartPointer<vtkVectorNorm> norm = vtkSmartPointer<vtkVectorNorm>::New();
   norm->SetInputConnection(pointSet->GetProducerPort());
@@ -446,10 +419,7 @@ void vtkSlicerTransformVisualizerLogic::GlyphPreprocessInput(bool inputIsTransfo
   vectors->Initialize();
   vectors->SetNumberOfComponents(3);  
 
-  vtkSmartPointer<vtkMatrix4x4> IJKToRAS = vtkSmartPointer<vtkMatrix4x4>::New();
-  
   // TODO: Can halve the size if there's just a function to handle adding a transform point versus an image point
-  // TODO: Vectors can be interpolated instead of being bound to the reference volume resolution
   //Pre-Process Transform Input
   if (inputIsTransform)
   {
@@ -457,14 +427,22 @@ void vtkSlicerTransformVisualizerLogic::GlyphPreprocessInput(bool inputIsTransfo
     vtkGeneralTransform* inputTransform = inputTransformNode->GetTransformToParent();
     
     vtkMRMLVolumeNode* referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
-    referenceVolumeNode->GetIJKToRASMatrix(IJKToRAS);
-    
     const int *extent = referenceVolumeNode->GetImageData()->GetExtent();
-  
-    int iExtent = extent[1]-extent[0];
-    int jExtent = extent[3]-extent[2];
-    int kExtent = extent[5]-extent[4];
-    int numPts = (iExtent+1)*(jExtent+1)*(kExtent+1);
+    const double *spacing = referenceVolumeNode->GetSpacing();
+    const double *origin = referenceVolumeNode->GetOrigin();
+    const double minSpacing = referenceVolumeNode->GetMinSpacing();
+    vtkSmartPointer<vtkMatrix4x4> IJKToRAS_IsotropicSpacing = vtkSmartPointer<vtkMatrix4x4>::New();
+    referenceVolumeNode->GetIJKToRASDirectionMatrix(IJKToRAS_IsotropicSpacing); //Original IJKToRAS Direction Matrix will not be modified
+    for (int row=0; row<3; row++)
+    {
+      for (int col=0; col<3; col++) 
+      {
+        IJKToRAS_IsotropicSpacing->SetElement(row, col, minSpacing * IJKToRAS_IsotropicSpacing->GetElement(row,col));
+      }
+      IJKToRAS_IsotropicSpacing->SetElement(row, 3, origin[row]);
+    }
+    
+    int numPts = ((extent[1]-extent[0])*(spacing[0]/minSpacing)+1)*((extent[3]-extent[2])*(spacing[1]/minSpacing)+1)*((extent[5]-extent[4])*(spacing[2]/minSpacing)+1);
 
     vtkSmartPointer<vtkMinimalStandardRandomSequence> random = vtkSmartPointer<vtkMinimalStandardRandomSequence>::New();
     random->SetSeed(seed);
@@ -479,22 +457,22 @@ void vtkSlicerTransformVisualizerLogic::GlyphPreprocessInput(bool inputIsTransfo
     double computedVector_RAS[3] = {0,0,0};
     
     double vMag = 0;
-    for(int k = extent[4]; k <= extent[5] && (neededValuesAdded < pointMax); k++)
+    for(int k = extent[4]*(spacing[2]/minSpacing); k <= extent[5]*(spacing[2]/minSpacing) && (neededValuesAdded < pointMax); k++)
     {
-      for(int j = extent[2]; j <= extent[3] && (neededValuesAdded < pointMax); j++)
+      for(int j = extent[2]*(spacing[1]/minSpacing); j <= extent[3]*(spacing[1]/minSpacing) && (neededValuesAdded < pointMax); j++)
       {
-        for(int i = extent[0]; i <= extent[1] && (neededValuesAdded < pointMax); i++)
+        for(int i = extent[0]*(spacing[0]/minSpacing); i <= extent[1]*(spacing[0]/minSpacing) && (neededValuesAdded < pointMax); i++)
         {
           random->Next();
           neededValuesLeft = pointMax - neededValuesAdded;
-          currentPointID = (i+j*(iExtent+1)+k*(iExtent+1)*(jExtent+1));
+          currentPointID++;
           rangeLeft = numPts - currentPointID;
           
           if ((random->GetRangeValue(0, rangeLeft)) < neededValuesLeft)
           {
             //Calculate corresponding vector
             fixedPoint_RAS[0]=i; fixedPoint_RAS[1]=j; fixedPoint_RAS[2]=k; fixedPoint_RAS[3]=1; 
-            IJKToRAS->MultiplyPoint(fixedPoint_RAS, fixedPoint_RAS);
+            IJKToRAS_IsotropicSpacing->MultiplyPoint(fixedPoint_RAS, fixedPoint_RAS);
             inputTransform->TransformPoint(fixedPoint_RAS, movingPoint_RAS);
             computedVector_RAS[0] = movingPoint_RAS[0] - fixedPoint_RAS[0];
             computedVector_RAS[1] = movingPoint_RAS[1] - fixedPoint_RAS[1];
@@ -509,19 +487,22 @@ void vtkSlicerTransformVisualizerLogic::GlyphPreprocessInput(bool inputIsTransfo
               
               //Add corresponding vector
               vectors->InsertNextTuple3(movingPoint_RAS[0] - fixedPoint_RAS[0], movingPoint_RAS[1] - fixedPoint_RAS[1], movingPoint_RAS[2] - fixedPoint_RAS[2]);
+
+              neededValuesAdded++;
             }
-            neededValuesAdded++;
           }
         }
       }
     }
+    pointSet->SetPoints(points);
+    vtkPointData* pointData = pointSet->GetPointData();
+    pointData->SetVectors(vectors);
   }
   //Pre-Process Vector Volume Input
+  //TODO: Missing thresholding! Combine the interpolation step with the random point step in order for thresholding to be possible?
   else
   {
     vtkMRMLVectorVolumeNode* inputVectorVolumeNode = vtkMRMLVectorVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
-    inputVectorVolumeNode->GetIJKToRASMatrix(IJKToRAS);
-    
     vtkImageData* inputDeformationField = inputVectorVolumeNode->GetImageData();
     vtkPointData* deformationFieldPointData = inputDeformationField->GetPointData();
     vtkFloatArray* deformationFieldVectors = vtkFloatArray::SafeDownCast(deformationFieldPointData->GetVectors());
@@ -531,12 +512,26 @@ void vtkSlicerTransformVisualizerLogic::GlyphPreprocessInput(bool inputIsTransfo
     }
     
     const int *extent = inputDeformationField->GetExtent();
-    
-    int iExtent = extent[1]-extent[0];
-    int jExtent = extent[3]-extent[2];
-    int kExtent = extent[5]-extent[4];
-    int numPts = (iExtent+1)*(jExtent+1)*(kExtent+1);    
-    
+    const double *spacing = inputVectorVolumeNode->GetSpacing();
+    const double *origin = inputVectorVolumeNode->GetOrigin();
+    const double minSpacing = inputVectorVolumeNode->GetMinSpacing();
+
+    vtkSmartPointer<vtkMatrix4x4> IJKToRAS_IsotropicSpacing = vtkSmartPointer<vtkMatrix4x4>::New();
+    inputVectorVolumeNode->GetIJKToRASDirectionMatrix(IJKToRAS_IsotropicSpacing); //Original IJKToRAS Direction Matrix will not be modified
+    for (int row=0; row<3; row++)
+    {
+      for (int col=0; col<3; col++) 
+      {
+        IJKToRAS_IsotropicSpacing->SetElement(row, col, minSpacing * IJKToRAS_IsotropicSpacing->GetElement(row,col));
+      }
+      IJKToRAS_IsotropicSpacing->SetElement(row, 3, origin[row]);
+    }
+
+    double iSubdivision = minSpacing/spacing[0];
+    double jSubdivision = minSpacing/spacing[1];
+    double kSubdivision = minSpacing/spacing[2];
+    int numPts = ((extent[1]-extent[0])*(spacing[0]/minSpacing)+1)*((extent[3]-extent[2])*(spacing[1]/minSpacing)+1)*((extent[5]-extent[4])*(spacing[2]/minSpacing)+1);
+
     vtkSmartPointer<vtkMinimalStandardRandomSequence> random = vtkSmartPointer<vtkMinimalStandardRandomSequence>::New();
     random->SetSeed(seed);
     
@@ -545,68 +540,119 @@ void vtkSlicerTransformVisualizerLogic::GlyphPreprocessInput(bool inputIsTransfo
     int neededValuesLeft= 0;
     int currentPointID = 0;
     
-    double fixedPoint_RAS[4] = {0,0,0,0};
-    double* chosenVector = NULL;
-    
     double vMag = 0;
-    for(int k = extent[4]; k <= extent[5] && (neededValuesAdded < pointMax); k++)
+    for(int k = extent[4]*(spacing[2]/minSpacing); k <= extent[5]*(spacing[2]/minSpacing) && (neededValuesAdded < pointMax); k++)
     {
-      for(int j = extent[2]; j <= extent[3] && (neededValuesAdded < pointMax); j++)
+      for(int j = extent[2]*(spacing[1]/minSpacing); j <= extent[3]*(spacing[1]/minSpacing) && (neededValuesAdded < pointMax); j++)
       {
-        for(int i = extent[0]; i <= extent[1] && (neededValuesAdded < pointMax); i++)
+        for(int i = extent[0]*(spacing[0]/minSpacing); i <= extent[1]*(spacing[0]/minSpacing) && (neededValuesAdded < pointMax); i++)
         {
           random->Next();
           neededValuesLeft = pointMax - neededValuesAdded;
-          currentPointID = (i+j*(iExtent+1)+k*(iExtent+1)*(jExtent+1));
+          currentPointID++;
           rangeLeft = numPts - currentPointID;
           
           if ((random->GetRangeValue(0, rangeLeft)) < neededValuesLeft)
           {
-            //Calculate corresponding vector
-            //Just use Applying Matrix thing
-            fixedPoint_RAS[0]=i; fixedPoint_RAS[1]=j; fixedPoint_RAS[2]=k; fixedPoint_RAS[3]=1; 
-            IJKToRAS->MultiplyPoint(fixedPoint_RAS, fixedPoint_RAS);
-            chosenVector = deformationFieldVectors->GetTuple3(currentPointID);
-            vMag = vtkMath::Norm(chosenVector, 3);
-            
-            //Ignore the point and vector if outside magnitude bounds
-            if (vMag >= min && vMag <= max)
-            {
-              //Add point
-              points->InsertNextPoint(fixedPoint_RAS[0], fixedPoint_RAS[1], fixedPoint_RAS[2]);
-              
-              //Add corresponding vector
-              vectors->InsertNextTuple3(chosenVector[0], chosenVector[1], chosenVector[2]);
-            }
+            points->InsertNextPoint(((double)i)*iSubdivision, ((double)j)*jSubdivision, ((double)k)*kSubdivision);
             neededValuesAdded++;
           }
         }
       }
     }
-  }
 
-  pointSet->SetPoints(points);
-  vtkPointData* pointData = pointSet->GetPointData();
-  pointData->SetVectors(vectors);
+    vtkSmartPointer<vtkPolyData> pointsData = vtkSmartPointer<vtkPolyData>::New();
+    pointsData->SetPoints(points);
+
+    vtkSmartPointer<vtkProbeFilter> probeFilter = vtkSmartPointer<vtkProbeFilter>::New();
+    inputDeformationField->GetPointData()->SetActiveVectors("ImageScalars");
+    probeFilter->SpatialMatchOn();
+    probeFilter->SetInputConnection(pointsData->GetProducerPort());
+    probeFilter->SetSource(inputDeformationField);
+    probeFilter->Update();
+    vtkDataSet* interpolatedVectorSet = probeFilter->GetOutput();
+
+    //Why am I not just applying this to the whole dataset at once?
+    double fixedPoint_RAS[4] = {0,0,0,0};
+    for(double index = 0; index <= points->GetNumberOfPoints(); index++)
+    {
+      points->GetPoint(index, fixedPoint_RAS);
+      IJKToRAS_IsotropicSpacing->MultiplyPoint(fixedPoint_RAS, fixedPoint_RAS);
+      fixedPoint_RAS[0]=fixedPoint_RAS[0]/iSubdivision; fixedPoint_RAS[1]=fixedPoint_RAS[1]/jSubdivision; fixedPoint_RAS[2]=fixedPoint_RAS[2]/kSubdivision;
+      points->SetPoint(index, fixedPoint_RAS[0] + origin[0], fixedPoint_RAS[1] + origin[1], fixedPoint_RAS[2] + origin[2]);
+    }
+    vectors->DeepCopy(interpolatedVectorSet->GetPointData()->GetScalars());
+
+    pointSet->SetPoints(points);
+    vtkPointData* pointData = pointSet->GetPointData();
+    pointData->SetVectors(vectors);
+  }
+  
+
 }
 
 //Grid Visualization
 //----------------------------------------------------------------------------
-void vtkSlicerTransformVisualizerLogic::GridVisualization(vtkImageData* field, vtkPolyData* output)
+void vtkSlicerTransformVisualizerLogic::GridVisualization(bool inputIsTransform, vtkPolyData* output)
 {
-  const int subdivision = 1;
   int lineSpacing = this->TransformVisualizerNode->GetGridSpacingMM();
+  vtkSmartPointer<vtkImageData> field = vtkSmartPointer<vtkImageData>::New();
+
+  double* initialOrigin = NULL;
+  double* initialSpacing = NULL;
+  vtkSmartPointer<vtkMatrix4x4> IJKToRASDirection = vtkSmartPointer<vtkMatrix4x4>::New();
+  if (inputIsTransform)
+  {
+    vtkMRMLVolumeNode* referenceVolumeNode = vtkMRMLVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetReferenceVolumeNodeID()));
+    field->DeepCopy(referenceVolumeNode->GetImageData());
+    referenceVolumeNode->GetIJKToRASDirectionMatrix(IJKToRASDirection);
+    initialSpacing = referenceVolumeNode->GetSpacing();
+    initialOrigin = referenceVolumeNode->GetOrigin();
+  }
+  else
+  {
+    vtkMRMLVectorVolumeNode* inputVectorVolumeNode = vtkMRMLVectorVolumeNode::SafeDownCast(this->GetMRMLScene()->GetNodeByID(this->TransformVisualizerNode->GetInputNodeID()));
+    field->DeepCopy(inputVectorVolumeNode->GetImageData());
+    inputVectorVolumeNode->GetIJKToRASDirectionMatrix(IJKToRASDirection);
+    initialSpacing = inputVectorVolumeNode->GetSpacing();
+    initialOrigin = inputVectorVolumeNode->GetOrigin();
+  }
+  field->SetSpacing(initialSpacing);
+  field->SetOrigin(initialOrigin);
+
+  //vtkSmartPointer<vtkTransform> IJKToRASTransform = vtkSmartPointer<vtkTransform>::New();
+  //IJKToRASTransform->SetMatrix(IJKToRASDirection);
+  //vtkSmartPointer<vtkTransformFilter> IJKToRASFilter = vtkSmartPointer<vtkTransformFilter>::New();
+  //IJKToRASFilter->SetInput(field);
+  //IJKToRASFilter->SetTransform(IJKToRASTransform);
+  //IJKToRASFilter->Update();
+  
+  //vtkSmartPointer<vtkImageData> transformedField = vtkSmartPointer<vtkImageData>::New();
+  //transformedField->DeepCopy(vtkImageData::SafeDownCast(IJKToRASFilter->GetOutput()));
+  
+  //std::cout<<transformedField->GetNumberOfPoints()<<std::endl;
   
   vtkSmartPointer<vtkImageResample> resampled = vtkSmartPointer<vtkImageResample>::New();
-  resampled->SetInput(field);
-  resampled->SetAxisOutputSpacing(0, lineSpacing / subdivision);
-  resampled->SetAxisOutputSpacing(1, lineSpacing / subdivision);
-  resampled->SetAxisOutputSpacing(2, lineSpacing / subdivision);
+  //resampled->SetInput(IJKToRASFilter->GetOutput());
+  //resampled->SetInputConnection(transformedField->GetProducerPort());
+  resampled->SetInputConnection(field->GetProducerPort());
+  resampled->SetAxisOutputSpacing(0, lineSpacing);
+  resampled->SetAxisOutputSpacing(1, lineSpacing);
+  resampled->SetAxisOutputSpacing(2, lineSpacing);
   resampled->Update();
 
+  
   vtkSmartPointer<vtkImageData> resampledField = vtkSmartPointer<vtkImageData>::New();
   resampledField = resampled->GetOutput();
   
+  std::cout<<resampledField->GetNumberOfPoints()<<std::endl;
+
+  
+  resampledField->GetPointData()->SetVectors(field->GetPointData()->GetVectors());
+  if (resampledField->GetPointData()->GetVectors() == NULL)
+  {
+    resampledField->GetPointData()->SetVectors(field->GetPointData()->GetScalars());
+  }
   const double* origin = resampledField->GetOrigin();
   const double* spacing = resampledField->GetSpacing();
   const int* dimensions = resampledField->GetDimensions();  
@@ -629,11 +675,11 @@ void vtkSlicerTransformVisualizerLogic::GridVisualization(vtkImageData* field, v
     }
   }
   
-  for (k = 0; k < dimensions[2]; k+=subdivision)
+  for (k = 0; k < dimensions[2]; k++)
   {
-    for (j = 0; j < dimensions[1]; j+=subdivision)
+    for (j = 0; j < dimensions[1]; j++)
     {
-      for (i = 0; i < ((dimensions[0]-1)-((dimensions[0]-1)%subdivision)); i++)
+      for (i = 0; i < (dimensions[0]-1); i++)
       {
         line->GetPointIds()->SetId(0, (i) + (j*dimensions[0]) + (k*dimensions[0]*dimensions[1]));
         line->GetPointIds()->SetId(1, (i+1) + (j*dimensions[0]) + (k*dimensions[0]*dimensions[1]));
@@ -642,11 +688,11 @@ void vtkSlicerTransformVisualizerLogic::GridVisualization(vtkImageData* field, v
     }
   }
 
-  for (k = 0; k < dimensions[2]; k+=subdivision)
+  for (k = 0; k < dimensions[2]; k++)
   {
-    for (j = 0; j < ((dimensions[1]-1)-((dimensions[1]-1)%subdivision)); j++)
+    for (j = 0; j < (dimensions[1]-1); j++)
     {
-      for (i = 0; i < dimensions[0]; i+=subdivision)
+      for (i = 0; i < dimensions[0]; i++)
       {
         line->GetPointIds()->SetId(0, (i) + ((j)*dimensions[0]) + (k*dimensions[0]*dimensions[1]));
         line->GetPointIds()->SetId(1, (i) + ((j+1)*dimensions[0]) + (k*dimensions[0]*dimensions[1]));
@@ -655,11 +701,11 @@ void vtkSlicerTransformVisualizerLogic::GridVisualization(vtkImageData* field, v
     }
   }
   
-  for (k = 0; k < ((dimensions[2]-1)-((dimensions[2]-1)%subdivision)); k++)
+  for (k = 0; k < (dimensions[2]-1); k++)
   {
-    for (j = 0; j < dimensions[1]; j+=subdivision)
+    for (j = 0; j < dimensions[1]; j++)
     {
-      for (i = 0; i < dimensions[0]; i+=subdivision)
+      for (i = 0; i < dimensions[0]; i++)
       {
         line->GetPointIds()->SetId(0, (i) + ((j)*dimensions[0]) + ((k)*dimensions[0]*dimensions[1]));
         line->GetPointIds()->SetId(1, (i) + ((j)*dimensions[0]) + ((k+1)*dimensions[0]*dimensions[1]));
@@ -668,30 +714,36 @@ void vtkSlicerTransformVisualizerLogic::GridVisualization(vtkImageData* field, v
     }
   }  
   
-  resampledField->GetPointData()->SetActiveVectors("ImageScalars");
   vtkSmartPointer<vtkFloatArray> vectorArray = vtkFloatArray::SafeDownCast(resampledField->GetPointData()->GetVectors());
+  if (vectorArray == NULL)
+  {
+    vtkSmartPointer<vtkFloatArray> vectorArray = vtkFloatArray::SafeDownCast(resampledField->GetPointData()->GetScalars());
+  }
+  
   
   vtkSmartPointer<vtkVectorNorm> norm = vtkSmartPointer<vtkVectorNorm>::New();
   norm->SetInputConnection(resampledField->GetProducerPort());
   norm->Update();
+  
   
   vtkSmartPointer<vtkFloatArray> vectorMagnitude = vtkFloatArray::SafeDownCast(norm->GetOutput()->GetPointData()->GetScalars());
   
   vtkSmartPointer<vtkPolyData> polygrid = vtkSmartPointer<vtkPolyData>::New();
   polygrid->SetPoints(points);
   polygrid->SetLines(grid);
-  polygrid->GetPointData()->AddArray(vectorArray);
-  polygrid->GetPointData()->SetActiveVectors(vectorArray->GetName());
-  
+  //polygrid->GetPointData()->AddArray(vectorArray);
+  //polygrid->GetPointData()->SetActiveVectors(vectorArray->GetName());
+
   vtkSmartPointer<vtkWarpVector> warp = vtkSmartPointer<vtkWarpVector>::New();
   warp->SetInputConnection(polygrid->GetProducerPort());
   warp->SetScaleFactor(this->TransformVisualizerNode->GetGridScale());
   warp->Update();
-  
+
   output->ShallowCopy(warp->GetPolyDataOutput());
   output->Update();
-  output->GetPointData()->AddArray(vectorMagnitude);
-  vectorMagnitude->SetName("VectorMagnitude");
+  //output->GetPointData()->AddArray(vectorMagnitude);
+  //vectorMagnitude->SetName("VectorMagnitude");
+  
 }
 
 //----------------------------------------------------------------------------

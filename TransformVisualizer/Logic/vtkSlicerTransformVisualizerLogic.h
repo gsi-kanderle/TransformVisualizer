@@ -75,11 +75,11 @@ public:
   void CreateVisualization(int visualizationMode);
   void InitializeOutputModelNode(vtkMRMLModelNode* outputModelNode);
   
-  void GlyphVisualization(bool inputIsTransform, vtkPolyData*, int);
+  void GlyphVisualization(bool inputIsTransform, vtkPolyData*);
   void GlyphSliceVisualization(bool inputIsTransform, vtkPolyData*); 
   void GlyphPreprocessInput(bool inputIsTransform, vtkUnstructuredGrid*, int seed, int pointMax, double min, double max);
   
-  void GridVisualization(vtkImageData*, vtkPolyData* output);
+  void GridVisualization(bool inputIsTransform, vtkPolyData* output);
   void GridSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>);
   
   void BlockVisualization(bool inputIsTransform, vtkPolyData* output);
