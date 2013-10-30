@@ -31,15 +31,20 @@
 #include <vtkMRMLModelNode.h>
 
 //----------------------------------------------------------------------------
+std::string vtkMRMLTransformVisualizerNode::InputReferenceRole = std::string("inputNode");
+std::string vtkMRMLTransformVisualizerNode::ReferenceVolumeReferenceRole = std::string("referenceVolume");
+std::string vtkMRMLTransformVisualizerNode::OutputModelReferenceRole = std::string("outputModel");
+
+std::string vtkMRMLTransformVisualizerNode::GlyphSliceReferenceRole = std::string("glyphSlice");
+std::string vtkMRMLTransformVisualizerNode::GridSliceReferenceRole = std::string("gridSlice");
+
+//----------------------------------------------------------------------------
 vtkMRMLNodeNewMacro(vtkMRMLTransformVisualizerNode);
 
 //----------------------------------------------------------------------------
 vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode()
 {
-  this->InputNodeID = NULL;
-  this->ReferenceVolumeNodeID = NULL;
-  this->OutputModelNodeID = NULL;
-    
+ 
   //Glyph Parameters
   this->GlyphPointMax = 2000;
   this->GlyphScale = 1;
@@ -72,13 +77,12 @@ vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode()
   this->BlockDisplacementCheck = 0;
     
   //Contour Parameters
-  //Temporary Initialization
-  this->ContourNumber = 0;
-  this->ContourValues = NULL;
+  this->ContourNumber = 3;
+  this->ContourValues = new double[this->ContourNumber];
+  this->ContourValues[0] = 1; this->ContourValues[1] = 2; this->ContourValues[2] = 3;
   this->ContourDecimation = 0.25;
 
   //Glyph Slice Parameters
-  this->GlyphSliceNodeID = NULL;
   this->GlyphSlicePointMax = 6000;
   this->GlyphSliceThresholdMax = 1000;
   this->GlyphSliceThresholdMin = 0;  
@@ -86,7 +90,6 @@ vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode()
   this->GlyphSliceSeed = 687848400;
   
   //Grid Slice Parameters
-  this->GridSliceNodeID = NULL;
   this->GridSliceScale = 1;
   this->GridSliceSpacingMM = 12;
     
@@ -95,11 +98,6 @@ vtkMRMLTransformVisualizerNode::vtkMRMLTransformVisualizerNode()
 //----------------------------------------------------------------------------
 vtkMRMLTransformVisualizerNode::~vtkMRMLTransformVisualizerNode()
 {
-  this->SetInputNodeID(NULL);
-  this->SetReferenceVolumeNodeID(NULL);
-  this->SetOutputModelNodeID(NULL);
-  this->SetGlyphSliceNodeID(NULL);
-  this->SetGridSliceNodeID(NULL);
   delete[] this->ContourValues;
 }
 
@@ -114,19 +112,6 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts)
   while (*atts != NULL){
     attName = *(atts++);
     attValue = *(atts++);
-    
-    if (!strcmp(attName, "InputNodeID")){
-      this->SetInputNodeID(attValue);
-      continue;
-    }
-    if (!strcmp(attName, "ReferenceVolumeNodeID")){
-      this->SetReferenceVolumeNodeID(attValue);
-      continue;
-    }
-    if (!strcmp(attName, "OutputModelNodeID")){
-      this->SetOutputModelNodeID(attValue);
-      continue;
-    }    
     
     if (!strcmp(attName,"GlyphPointMax")){
       std::stringstream ss;
@@ -287,12 +272,6 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts)
       continue;
     }
     
-    if (!strcmp(attName,"GlyphSliceNodeID")){
-      std::stringstream ss;
-      ss << attValue;
-      ss >> this->GlyphSliceNodeID;
-      continue;
-    }  
     if (!strcmp(attName,"GlyphSlicePointMax")){
       std::stringstream ss;
       ss << attValue;
@@ -324,12 +303,6 @@ void vtkMRMLTransformVisualizerNode::ReadXMLAttributes(const char** atts)
       continue;
     }    
 
-    if (!strcmp(attName,"GridSliceNodeID")){
-      std::stringstream ss;
-      ss << attValue;
-      ss >> this->GridSliceNodeID;
-      continue;
-    }  
     if (!strcmp(attName,"GridSliceScale")){
       std::stringstream ss;
       ss << attValue;
@@ -352,10 +325,6 @@ void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent)
 {
   Superclass::WriteXML(of, nIndent);
   vtkIndent indent(nIndent);
-
-  of << indent << " InputNodeID=\"" << (this->InputNodeID ? this->InputNodeID : "NULL") << "\"";
-  of << indent << " ReferenceVolumeNodeID=\"" << (this->ReferenceVolumeNodeID ? this->ReferenceVolumeNodeID : "NULL") << "\"";
-  of << indent << " OutputModelNodeID=\"" << (this->OutputModelNodeID ? this->OutputModelNodeID : "NULL") << "\"";
   
   of << indent << " GlyphPointMax=\""<< this->GlyphPointMax << "\"";
   of << indent << " GlyphScale=\""<< this->GlyphScale << "\"";
@@ -385,15 +354,13 @@ void vtkMRMLTransformVisualizerNode::WriteXML(ostream& of, int nIndent)
   of << indent << " ContourNumber=\""<< this->ContourNumber << "\"";
   //of << indent << " ContourValues=\""<< this->ContourValues << "\"";
   of << indent << " ContourDecimation=\""<< this->ContourDecimation << "\"";
-
-  of << indent << " GlyphSliceNodeID=\"" << (this->GlyphSliceNodeID ? this->GlyphSliceNodeID : "NULL") << "\"";  
+ 
   of << indent << " GlyphSlicePointMax=\""<< this->GlyphSlicePointMax << "\"";
   of << indent << " GlyphSliceThresholdMax=\""<< this->GlyphSliceThresholdMax << "\"";
   of << indent << " GlyphSliceThresholdMin=\""<< this->GlyphSliceThresholdMin << "\"";  
   of << indent << " GlyphSliceScale=\""<< this->GlyphSliceScale << "\"";
   of << indent << " GlyphSliceSeed=\""<< this->GlyphSliceSeed << "\"";    
   
-  of << indent << " GridSliceNodeID=\"" << (this->GridSliceNodeID ? this->GridSliceNodeID : "NULL") << "\"";    
   of << indent << " GridSliceScale=\""<< this->GridSliceScale << "\"";
   of << indent << " GridSliceSpacingMM=\""<< this->GridSliceSpacingMM << "\"";      
 }
@@ -404,10 +371,6 @@ void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode)
   Superclass::Copy(anode);
   vtkMRMLTransformVisualizerNode *node = vtkMRMLTransformVisualizerNode::SafeDownCast(anode);
   this->DisableModifiedEventOn();
-
-  this->SetInputNodeID(node->GetInputNodeID());
-  this->SetReferenceVolumeNodeID(node->GetReferenceVolumeNodeID());
-  this->SetOutputModelNodeID(node->GetOutputModelNodeID());
   
   this->GlyphPointMax = node->GlyphPointMax;
   this->GlyphThresholdMax = node->GlyphThresholdMax;
@@ -437,14 +400,12 @@ void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode)
   //this->ContourValues = node->ContourValues;
   this->ContourDecimation = node->ContourDecimation;
 
-  this->GlyphSliceNodeID = (node->GetGlyphSliceNodeID());
   this->GlyphSlicePointMax = node->GlyphSlicePointMax;
   this->GlyphSliceThresholdMax = node->GlyphSliceThresholdMax;
   this->GlyphSliceThresholdMin = node->GlyphSliceThresholdMin;  
   this->GlyphSliceScale = node->GlyphSliceScale;
   this->GlyphSliceSeed = node->GlyphSliceSeed;
   
-  this->GridSliceNodeID = (node->GetGridSliceNodeID());
   this->GridSliceScale = node->GridSliceScale;
   this->GridSliceSpacingMM = node->GridSliceSpacingMM;  
 
@@ -453,102 +414,76 @@ void vtkMRMLTransformVisualizerNode::Copy(vtkMRMLNode *anode)
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::UpdateReferenceID(const char *oldID, const char *newID)
+vtkMRMLNode* vtkMRMLTransformVisualizerNode::GetInputNode()
 {
-  if (this->InputNodeID && !strcmp(oldID, this->InputNodeID)){
-    this->SetAndObserveInputNodeID(newID);
-  }
-
-  if (this->OutputModelNodeID && !strcmp(oldID, this->OutputModelNodeID)){
-    this->SetAndObserveOutputModelNodeID(newID);
-  }
-  
-  if (this->GlyphSliceNodeID && !strcmp(oldID, this->GlyphSliceNodeID)){
-    this->SetAndObserveGlyphSliceNodeID(newID);
-  }
-
-  if (this->GridSliceNodeID && !strcmp(oldID, this->GridSliceNodeID)){
-    this->SetAndObserveGridSliceNodeID(newID);
-  }  
+  return this->GetNodeReference(vtkMRMLTransformVisualizerNode::InputReferenceRole.c_str());
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveInputNodeID(const char* id)
+void vtkMRMLTransformVisualizerNode::SetAndObserveInputNode(vtkMRMLNode* node)
 {
-  if (this->InputNodeID){
-    this->Scene->RemoveReferencedNodeID(this->InputNodeID, this);
-  }
-  
-  this->SetInputNodeID(id);
-  
-  if (id){
-    this->Scene->AddReferencedNodeID(this->InputNodeID, this);
-  }
+  this->SetNthNodeReferenceID(vtkMRMLTransformVisualizerNode::InputReferenceRole.c_str(),0,node->GetID());
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveReferenceVolumeNodeID(const char* id)
+vtkMRMLNode* vtkMRMLTransformVisualizerNode::GetReferenceVolumeNode()
 {
-  if (this->ReferenceVolumeNodeID){
-    this->Scene->RemoveReferencedNodeID(this->ReferenceVolumeNodeID, this);
-  }
-  
-  this->SetReferenceVolumeNodeID(id);
-  
-  if (id){
-    this->Scene->AddReferencedNodeID(this->ReferenceVolumeNodeID, this);
-  }
+  return this->GetNodeReference(vtkMRMLTransformVisualizerNode::ReferenceVolumeReferenceRole.c_str());
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveOutputModelNodeID(const char* id)
+void vtkMRMLTransformVisualizerNode::SetAndObserveReferenceVolumeNode(vtkMRMLNode* node)
 {
-  if (this->OutputModelNodeID){
-    this->Scene->RemoveReferencedNodeID(this->OutputModelNodeID, this);
-  }
-  
-  this->SetOutputModelNodeID(id);
-  
-  if (id){
-    this->Scene->AddReferencedNodeID(this->OutputModelNodeID, this);
-  }
+  this->SetNthNodeReferenceID(vtkMRMLTransformVisualizerNode::ReferenceVolumeReferenceRole.c_str(),0,node->GetID());
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveGlyphSliceNodeID(const char* id)
+vtkMRMLNode* vtkMRMLTransformVisualizerNode::GetOutputModelNode()
 {
-  if (this->GlyphSliceNodeID){
-    this->Scene->RemoveReferencedNodeID(this->GlyphSliceNodeID, this);
-  }
-  
-  this->SetGlyphSliceNodeID(id);
-  
-  if (id){
-    this->Scene->AddReferencedNodeID(this->GlyphSliceNodeID, this);
-  }
+  return this->GetNodeReference(vtkMRMLTransformVisualizerNode::OutputModelReferenceRole.c_str());
 }
 
 //----------------------------------------------------------------------------
-void vtkMRMLTransformVisualizerNode::SetAndObserveGridSliceNodeID(const char* id)
+void vtkMRMLTransformVisualizerNode::SetAndObserveOutputModelNode(vtkMRMLNode* node)
 {
-  if (this->GridSliceNodeID){
-    this->Scene->RemoveReferencedNodeID(this->GridSliceNodeID, this);
-  }
-  
-  this->SetGridSliceNodeID(id);
-  
-  if (id){
-    this->Scene->AddReferencedNodeID(this->GridSliceNodeID, this);
-  }
+  this->SetNthNodeReferenceID(vtkMRMLTransformVisualizerNode::OutputModelReferenceRole.c_str(),0,node->GetID());
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLNode* vtkMRMLTransformVisualizerNode::GetGlyphSliceNode()
+{
+  return this->GetNodeReference(vtkMRMLTransformVisualizerNode::GlyphSliceReferenceRole.c_str());
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLTransformVisualizerNode::SetAndObserveGlyphSliceNode(vtkMRMLNode* node)
+{
+  this->SetNthNodeReferenceID(vtkMRMLTransformVisualizerNode::GlyphSliceReferenceRole.c_str(),0,node->GetID());
+}
+
+//----------------------------------------------------------------------------
+vtkMRMLNode* vtkMRMLTransformVisualizerNode::GetGridSliceNode()
+{
+  return this->GetNodeReference(vtkMRMLTransformVisualizerNode::GridSliceReferenceRole.c_str());
+}
+
+//----------------------------------------------------------------------------
+void vtkMRMLTransformVisualizerNode::SetAndObserveGridSliceNode(vtkMRMLNode* node)
+{
+  this->SetNthNodeReferenceID(vtkMRMLTransformVisualizerNode::GridSliceReferenceRole.c_str(),0,node->GetID());
 }
 
 //----------------------------------------------------------------------------
 void vtkMRMLTransformVisualizerNode::SetContourValues(double* values, int size)
 {
   if (this->ContourValues) { delete [] this->ContourValues; }
+  this->ContourValues = new double[size];
   if (values)
   {
-    this->ContourValues = values;
+    for (int i = 0;i<size;i++)
+    {
+      this->ContourValues[i] = values[i];
+    }
   }
   else
   {
@@ -567,9 +502,6 @@ void vtkMRMLTransformVisualizerNode::PrintSelf(ostream& os, vtkIndent indent)
 {
   Superclass::PrintSelf(os,indent);
 
-  os << indent << " InputNodeID = " << (this->InputNodeID ? this->InputNodeID : "NULL") << "\n";
-  os << indent << " ReferenceNodeID = " << (this->ReferenceVolumeNodeID ? this->ReferenceVolumeNodeID : "NULL") << "\n";  
-  os << indent << " OutputModelNodeID = " << (this->OutputModelNodeID ? this->OutputModelNodeID : "NULL") << "\n";
   os << indent << " GlyphPointMax = "<< this->GlyphPointMax << "\n";
   os << indent << " GlyphScale = "<< this->GlyphScale << "\n";
   os << indent << " GlyphThresholdMax = "<< this->GlyphThresholdMax << "\n";
@@ -599,14 +531,12 @@ void vtkMRMLTransformVisualizerNode::PrintSelf(ostream& os, vtkIndent indent)
   //os << indent << " ContourValues = "<< this->ContourValues << "\n";
   os << indent << " ContourDecimation = "<< this->ContourDecimation << "\n";
 
-  os << indent << " GlyphSliceNodeID = " << (this->GlyphSliceNodeID ? this->GlyphSliceNodeID : "NULL") << "\n";  
   os << indent << " GlyphSlicePointMax = "<< this->GlyphSlicePointMax << "\n";
   os << indent << " GlyphSliceThresholdMax = "<< this->GlyphSliceThresholdMax << "\n";
   os << indent << " GlyphSliceThresholdMin = "<< this->GlyphSliceThresholdMin << "\n";  
   os << indent << " GlyphSliceScale = "<< this->GlyphSliceScale << "\n";
   os << indent << " GlyphSliceSeed = "<< this->GlyphSliceSeed << "\n";    
-  
-  os << indent << " GridSliceNodeID = "<< (this->GridSliceNodeID ? this->GridSliceNodeID : "NULL") << "\n";    
+   
   os << indent << " GridSliceScale = "<< this->GridSliceScale << "\n";
   os << indent << " GridSliceSpacingMM = "<< this->GridSliceSpacingMM << "\n";    
 }

@@ -216,9 +216,7 @@ int vtkTransformVisualizerGlyph3D::RequestData(
     
     // translate Source to Input point
     input->GetPoint(inPtId, x);
-    trans->Translate(x[0], x[1], x[2]);      //CHANGE THIS!
-    //trans->Translate(2, 5, 26);             //This works!
-    
+    trans->Translate(x[0], x[1], x[2]);
 
     // Copy Input vector
     for (i=0; i < numSourcePts; i++) 

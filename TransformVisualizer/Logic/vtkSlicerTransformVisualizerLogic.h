@@ -73,14 +73,14 @@ public:
    * TODO: Add description of the function itself and its arguments
    */
   void CreateVisualization(int visualizationMode);
-  void InitializeOutputModelNode(vtkMRMLModelNode* outputModelNode);
+  void UpdateOutputModelNode(vtkMRMLModelNode* outputModelNode);
   
   void GlyphVisualization(bool inputIsTransform, vtkPolyData*);
   void GlyphSliceVisualization(bool inputIsTransform, vtkPolyData*); 
   void GlyphPreprocessInput(bool inputIsTransform, vtkUnstructuredGrid*, int seed, int pointMax, double min, double max);
   
   void GridVisualization(bool inputIsTransform, vtkPolyData* output);
-  void GridSliceVisualization(vtkImageData*, vtkPolyData* output, vtkSmartPointer<vtkMatrix4x4>);
+  void GridSliceVisualization(bool inputIsTransform, vtkPolyData* output);
   
   void BlockVisualization(bool inputIsTransform, vtkPolyData* output);
   

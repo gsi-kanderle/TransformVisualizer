@@ -23,6 +23,9 @@
 #include <QDebug>
 #include <QtCore>
 #include <QtGui>
+#include <QRegExp>
+#include <QValidator>
+#include <QRegExpValidator>
 
 // SlicerQt includes
 #include "qSlicerTransformVisualizerModuleWidget.h"
@@ -165,9 +168,9 @@ void qSlicerTransformVisualizerModuleWidget::update()
   
   // Update widget from MRML
   d->ParameterComboBox->setCurrentNode(pNode);
-  d->InputFieldComboBox->setCurrentNodeID(pNode->GetInputNodeID());
-  d->InputReferenceComboBox->setCurrentNodeID(pNode->GetReferenceVolumeNodeID());
-  d->OutputModelComboBox->setCurrentNodeID(pNode->GetOutputModelNodeID());
+  d->InputFieldComboBox->setCurrentNode(pNode->GetInputNode());
+  d->InputReferenceComboBox->setCurrentNode(pNode->GetReferenceVolumeNode());
+  d->OutputModelComboBox->setCurrentNode(pNode->GetOutputModelNode());
 
   // Update Visualization Parameters
   // Glyph Parameters
@@ -209,9 +212,9 @@ void qSlicerTransformVisualizerModuleWidget::update()
 
   // Glyph Slice Parameters
   // Set default to a slice node that exists in the scene
-  if (pNode->GetGlyphSliceNodeID())
+  if (pNode->GetGlyphSliceNode())
   {
-    d->GlyphSliceComboBox->setCurrentNodeID(pNode->GetGlyphSliceNodeID());
+    d->GlyphSliceComboBox->setCurrentNode(pNode->GetGlyphSliceNode());
   }
   else
   {
@@ -224,9 +227,9 @@ void qSlicerTransformVisualizerModuleWidget::update()
   d->InputGlyphSliceSeed->setValue(pNode->GetGlyphSliceSeed());
 
   // Grid Slice Parameters
-  if (pNode->GetGridSliceNodeID())
+  if (pNode->GetGridSliceNode())
   {
-    d->GridSliceComboBox->setCurrentNodeID(pNode->GetGridSliceNodeID());
+    d->GridSliceComboBox->setCurrentNode(pNode->GetGridSliceNode());
   }
   else
   {
@@ -414,6 +417,9 @@ void qSlicerTransformVisualizerModuleWidget::setup()
   connect(d->InputBlockDisplacementCheck, SIGNAL(stateChanged(int)), this, SLOT(setBlockDisplacementCheck(int)));
 
   // Contour Parameters
+  QRegExp rx("^(([0-9]+(.[0-9]+)?),+)*([0-9]+(.[0-9]+)?)$");
+  d->InputContourValues->setValidator(new QRegExpValidator(rx,this));
+  connect(d->InputContourValues, SIGNAL(textChanged(QString)), this, SLOT(setContourValues(QString)));
   //connect(d->InputContourNumber, SIGNAL(valueChanged(double)), this, SLOT(setContourNumber(double)));
   //connect(d->InputContourRange, SIGNAL(valuesChanged(double, double)), this, SLOT(setContourRange(double, double)));
   connect(d->InputContourDecimation, SIGNAL(valueChanged(double)), this, SLOT(setContourDecimation(double)));
@@ -462,7 +468,7 @@ void qSlicerTransformVisualizerModuleWidget::inputChanged(vtkMRMLNode* node)
     std::cerr << "Error: Unsupported input type" << std::endl;
     return;  
   }
-  pNode->SetAndObserveInputNodeID(node->GetID());
+  pNode->SetAndObserveInputNode(node);
   this->updateLabels();
 }
 
@@ -476,7 +482,7 @@ void qSlicerTransformVisualizerModuleWidget::referenceVolumeChanged(vtkMRMLNode*
     std::cerr << "Error: Unable to set reference volume attribute" << std::endl;
     return;
   }
-  pNode->SetAndObserveReferenceVolumeNodeID(node->GetID());
+  pNode->SetAndObserveReferenceVolumeNode(node);
   this->updateLabels();
 }
 
@@ -490,7 +496,7 @@ void qSlicerTransformVisualizerModuleWidget::outputModelChanged(vtkMRMLNode* nod
     std::cerr << "Error: Unable to set output model attribute" << std::endl;
     return;
   }
-  pNode->SetAndObserveOutputModelNodeID(node->GetID());
+  pNode->SetAndObserveOutputModelNode(node);
   this->updateLabels();
 }
 
@@ -765,7 +771,7 @@ void qSlicerTransformVisualizerModuleWidget::setBlockDisplacementCheck(int state
 }
 
 //-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::setContourNumber(double number)
+void qSlicerTransformVisualizerModuleWidget::setContourValues(QString values_str)
 {
   Q_D(qSlicerTransformVisualizerModuleWidget);
   vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
@@ -773,19 +779,25 @@ void qSlicerTransformVisualizerModuleWidget::setContourNumber(double number)
   {
     return;
   }
-  pNode->SetContourNumber(number);
-}
-//-----------------------------------------------------------------------------
-void qSlicerTransformVisualizerModuleWidget::setContourRange(double min, double max)
-{
-  Q_D(qSlicerTransformVisualizerModuleWidget);
-  vtkMRMLTransformVisualizerNode* pNode = d->logic()->GetTransformVisualizerNode();
-  if (!pNode || !this->mrmlScene())
+  QStringList values_strlist = values_str.split(",");
+  QList<double> values_qlist;
+
+  int valuesSize = values_strlist.size();
+
+  for (int i=0; i<valuesSize; i++)
   {
-    return;
+    values_qlist.append(values_strlist[i].toDouble());
   }
-  //pNode->SetContourMin(min);
-  //pNode->SetContourMax(max);
+
+  double* values_array = new double[valuesSize];
+
+  for (int j=0; j<valuesSize; j++)
+  {
+    values_array[j] = values_qlist[j];
+  }
+
+  pNode->SetContourValues(values_array, valuesSize);
+  pNode->SetContourNumber(valuesSize);
 }
 
 //-----------------------------------------------------------------------------
@@ -810,7 +822,7 @@ void qSlicerTransformVisualizerModuleWidget::setGlyphSliceNode(vtkMRMLNode* node
   {
     return;
   }
-  pNode->SetAndObserveGlyphSliceNodeID(node->GetID());
+  pNode->SetAndObserveGlyphSliceNode(node);
 }
 
 //-----------------------------------------------------------------------------
@@ -886,7 +898,7 @@ void qSlicerTransformVisualizerModuleWidget::setGridSliceNode(vtkMRMLNode* node)
   {
     return;
   }
-  pNode->SetAndObserveGridSliceNodeID(node->GetID());
+  pNode->SetAndObserveGridSliceNode(node);
 }
 
 //-----------------------------------------------------------------------------

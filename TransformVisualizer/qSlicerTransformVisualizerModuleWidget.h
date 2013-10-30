@@ -93,8 +93,7 @@ protected slots:
   void setBlockDisplacementCheck(int);
     
   // Contour Parameters
-  void setContourNumber(double);
-  void setContourRange(double, double);
+  void setContourValues(QString);
   void setContourDecimation(double);
 
   // Glyph Slice Parameters

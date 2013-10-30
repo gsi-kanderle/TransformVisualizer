@@ -38,25 +38,28 @@ public:
   vtkTypeMacro(vtkMRMLTransformVisualizerNode, vtkMRMLNode);
   void PrintSelf(ostream& os, vtkIndent indent);
 
+  static std::string InputReferenceRole;
+  static std::string ReferenceVolumeReferenceRole;
+  static std::string OutputModelReferenceRole;
+
+  static std::string GlyphSliceReferenceRole;
+  static std::string GridSliceReferenceRole;
+
   virtual vtkMRMLNode* CreateNodeInstance();
   virtual void ReadXMLAttributes( const char** atts);
   virtual void WriteXML(ostream& of, int indent);
   virtual void Copy(vtkMRMLNode *node);
   virtual const char* GetNodeTagName() {return "TransformVisualizerParameters";};
-  virtual void UpdateReferenceID(const char *oldID, const char *newID);
 
 public:
-  vtkSetStringMacro(InputNodeID);
-  vtkGetStringMacro(InputNodeID);
-  void SetAndObserveInputNodeID(const char* id);
+  vtkMRMLNode* GetInputNode();
+  void SetAndObserveInputNode(vtkMRMLNode* node);
 
-  vtkSetStringMacro(ReferenceVolumeNodeID);
-  vtkGetStringMacro(ReferenceVolumeNodeID);
-  void SetAndObserveReferenceVolumeNodeID(const char* id);
+  vtkMRMLNode* GetReferenceVolumeNode();
+  void SetAndObserveReferenceVolumeNode(vtkMRMLNode* node);
 
-  vtkSetStringMacro(OutputModelNodeID);
-  vtkGetStringMacro(OutputModelNodeID);
-  void SetAndObserveOutputModelNodeID(const char* id);
+  vtkMRMLNode* GetOutputModelNode();
+  void SetAndObserveOutputModelNode(vtkMRMLNode* node);
 
   // Glyph Parameters
   vtkSetMacro(GlyphPointMax, int);
@@ -120,9 +123,8 @@ public:
   vtkGetMacro(ContourDecimation, float); 
   
   // Glyph Slice Parameters
-  vtkSetStringMacro(GlyphSliceNodeID);
-  vtkGetStringMacro(GlyphSliceNodeID);
-  void SetAndObserveGlyphSliceNodeID(const char* id);
+  vtkMRMLNode* GetGlyphSliceNode();
+  void SetAndObserveGlyphSliceNode(vtkMRMLNode* node);
   vtkSetMacro(GlyphSlicePointMax, int);
   vtkGetMacro(GlyphSlicePointMax, int);
   vtkSetMacro(GlyphSliceThresholdMax, double);
@@ -135,9 +137,8 @@ public:
   vtkGetMacro(GlyphSliceSeed, int);
   
   //Grid Slice Parameters
-  vtkSetStringMacro(GridSliceNodeID);
-  vtkGetStringMacro(GridSliceNodeID);
-  void SetAndObserveGridSliceNodeID(const char* id);
+  vtkMRMLNode* GetGridSliceNode();
+  void SetAndObserveGridSliceNode(vtkMRMLNode* node);
   vtkSetMacro(GridSliceScale, float);
   vtkGetMacro(GridSliceScale, float);
   vtkSetMacro(GridSliceSpacingMM, int);
@@ -149,10 +150,6 @@ protected:
 
   vtkMRMLTransformVisualizerNode(const vtkMRMLTransformVisualizerNode&);
   void operator=(const vtkMRMLTransformVisualizerNode&);
-  
-  char* InputNodeID;
-  char* ReferenceVolumeNodeID;
-  char* OutputModelNodeID;
 
 //Parameters
 protected:
@@ -196,7 +193,6 @@ protected:
   float ContourDecimation;
 
   // Glyph Slice Parameters
-  char* GlyphSliceNodeID;
   int GlyphSlicePointMax;
   double GlyphSliceThresholdMax;
   double GlyphSliceThresholdMin;
@@ -204,7 +200,6 @@ protected:
   int GlyphSliceSeed;
   
   // Grid Slice Parameters
-  char* GridSliceNodeID;
   float GridSliceScale;
   int GridSliceSpacingMM;
 };

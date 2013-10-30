@@ -347,7 +347,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     mrmlScene->AddNode(transformStorageNode);
 	mrmlScene->Commit();
 	gridTransformNode->SetAndObserveStorageNodeID(transformStorageNode->GetID());  
-	paramNode->SetAndObserveInputNodeID(gridTransformNode->GetID());
+	paramNode->SetAndObserveInputNode(gridTransformNode);
   }
   else if (transformStorageNode->ReadData(bsplineTransformNode))
   {
@@ -355,7 +355,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     mrmlScene->AddNode(transformStorageNode);
 	mrmlScene->Commit();
 	bsplineTransformNode->SetAndObserveStorageNodeID(transformStorageNode->GetID());
-	paramNode->SetAndObserveInputNodeID(bsplineTransformNode->GetID());
+	paramNode->SetAndObserveInputNode(bsplineTransformNode);
   }  
   else if (transformStorageNode->ReadData(linearTransformNode))
   {
@@ -363,7 +363,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     mrmlScene->AddNode(transformStorageNode);
 	mrmlScene->Commit();
 	linearTransformNode->SetAndObserveStorageNodeID(transformStorageNode->GetID());
-    paramNode->SetAndObserveInputNodeID(linearTransformNode->GetID());	
+    paramNode->SetAndObserveInputNode(linearTransformNode);	
   }
   else
   {
@@ -396,11 +396,11 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
     std::cerr << "Reading reference image from file '" << referenceVolumeFileName << "' failed!" << std::endl;
     return EXIT_FAILURE;
   }
-  paramNode->SetAndObserveReferenceVolumeNodeID(referenceVolumeNode->GetID());
+  paramNode->SetAndObserveReferenceVolumeNode(referenceVolumeNode);
 
   vtkSmartPointer<vtkMRMLModelNode> modelNode = vtkSmartPointer<vtkMRMLModelNode>::New();
   mrmlScene->AddNode(modelNode);
-  paramNode->SetAndObserveOutputModelNodeID(modelNode->GetID());	 
+  paramNode->SetAndObserveOutputModelNode(modelNode);	 
 
   mrmlScene->AddNode(paramNode);
 
@@ -431,7 +431,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   // Test Glyph option
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GLYPH_3D);
   
-  modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
+  modelNode = vtkMRMLModelNode::SafeDownCast(paramNode->GetOutputModelNode());  
   if (modelNode == NULL)
   {
     mrmlScene->Commit();
@@ -484,7 +484,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   // Test Grid option
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GRID_3D);
   
-  modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
+  modelNode = vtkMRMLModelNode::SafeDownCast(paramNode->GetOutputModelNode());  
   if (modelNode == NULL)
   {
     mrmlScene->Commit();
@@ -518,7 +518,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   // Test Block mode
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_BLOCK_3D);
   
-  modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
+  modelNode = vtkMRMLModelNode::SafeDownCast(paramNode->GetOutputModelNode());  
   if (modelNode == NULL)
   {
     mrmlScene->Commit();
@@ -572,7 +572,7 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   /*
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_CONTOUR_3D);
   
-  modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
+  modelNode = vtkMRMLModelNode::SafeDownCast(paramNode->GetOutputModelNode());  
   if (modelNode == NULL)
   {
     mrmlScene->Commit();
@@ -624,11 +624,11 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   
   mrmlScene->AddNode(axialSliceNode);
   
-  paramNode->SetGlyphSliceNodeID(axialSliceNode->GetID());
+  paramNode->SetAndObserveGlyphSliceNode(axialSliceNode);
   
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GLYPH_2D);
   
-  modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
+  modelNode = vtkMRMLModelNode::SafeDownCast(paramNode->GetOutputModelNode());  
   if (modelNode == NULL)
   {
     mrmlScene->Commit();
@@ -680,11 +680,11 @@ int vtkSlicerTransformVisualizerTest1(int argc, char *argv[])
   
   mrmlScene->AddNode(sagittalSliceNode);
   
-  paramNode->SetGridSliceNodeID(sagittalSliceNode->GetID());
+  paramNode->SetAndObserveGridSliceNode(sagittalSliceNode);
   
   TransformVisualizerLogic->CreateVisualization(TransformVisualizerLogic->VIS_MODE_GRID_2D);
   
-  modelNode = vtkMRMLModelNode::SafeDownCast(mrmlScene->GetNodeByID(paramNode->GetOutputModelNodeID()));  
+  modelNode = vtkMRMLModelNode::SafeDownCast(paramNode->GetOutputModelNode());  
   if (modelNode == NULL)
   {
     mrmlScene->Commit();
